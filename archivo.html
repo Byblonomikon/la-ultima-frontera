@@ -1,47 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archivo – La Última Frontera</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Archivo – La Última Frontera</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header>
-        <h1>La Última Frontera</h1>
-        <nav>
-            <a href="index.html">Inicio</a>
-            <a href="archivo.html" class="active">Archivo</a>
-            <a href="venta.html">Venta</a>
-            <a href="blog.html">Blog</a>
-            <a href="contacto.html">Contacto</a>
-        </nav>
-    </header>
-    <main>
-        <section id="archivo-libros" class="book-list"></section>
-    </main>
-    <script>
-        fetch('data/libros.json')
-            .then(response => response.json())
-            .then(libros => {
-                const contenedor = document.getElementById('archivo-libros');
-                libros.forEach(libro => {
-                    const div = document.createElement('div');
-                    div.className = 'book-item';
-                    const ventaTexto = libro.venta ? "Sí" : "No (solo archivo)";
-                    const enlaceGoogle = `https://www.google.com/search?tbm=bks&q=${encodeURIComponent(libro.titulo + " " + libro.autor)}`;
+  <header>
+    <h1>La Última Frontera</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="archivo.html" class="active">Archivo</a>
+      <a href="venta.html">Venta</a>
+      <a href="blog.html">Blog</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+  </header>
 
-                    div.innerHTML = `
-                        <h3>${libro.titulo}</h3>
-                        <p><strong>Autor:</strong> ${libro.autor}</p>
-                        <p>${libro.descripcion}</p>
-                        <p><strong>Estado:</strong> ${libro.estado}</p>
-                        <p><strong>Disponible para venta:</strong> ${ventaTexto}</p>
-                        <p><a href="${enlaceGoogle}" target="_blank">Ver en Google Books</a></p>
-                    `;
-                    contenedor.appendChild(div);
-                });
-            });
-    </script>
+  <main>
+    <section>
+      <input type="text" id="buscador" placeholder="Buscar por título o autor..." />
+    </section>
+
+    <section id="archivo-libros" class="book-list"></section>
+  </main>
+
+  <script>
+    let todosLosLibros = [];
+
+    function renderizarLibros(libros) {
+      const contenedor = document.getElementById('archivo-libros');
+      contenedor.innerHTML = '';
+      libros.forEach(libro => {
+        const div = document.createElement('div');
+        div.className = 'book-item';
+        const ventaTexto = libro.venta ? "Sí" : "No (solo archivo)";
+        const enlaceGoogle = `https://www.google.com/search?tbm=bks&q=${encodeURIComponent(libro.titulo + " " + libro.autor)}`;
+
+        div.innerHTML = `
+          <h3>${libro.titulo}</h3>
+          <p><strong>Autor:</strong> ${libro.autor}</p>
+          <p>${libro.descripcion}</p>
+          <p><strong>Estado:</strong> ${libro.estado}</p>
+          <p><strong>Disponible para venta:</strong> ${ventaTexto}</p>
+          <p><a href="${enlaceGoogle}" target="_blank">Ver en Google Books</a></p>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    fetch('data/libros.json')
+      .then(response => response.json())
+      .then(libros => {
+        todosLosLibros = libros;
+        renderizarLibros(libros);
+      });
+
+    document.getElementById("buscador").addEventListener("input", function () {
+      const texto = this.value.toLowerCase();
+      const filtrados = todosLosLibros.filter(libro =>
+        libro.titulo.toLowerCase().includes(texto) ||
+        libro.autor.toLowerCase().includes(texto)
+      );
+      renderizarLibros(filtrados);
+    });
+  </script>
 </body>
 </html>
