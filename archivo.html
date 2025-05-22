@@ -89,15 +89,34 @@
       renderizarLibros(librosArray);
     });
 
-    // Función para filtrar libros por búsqueda
-    document.getElementById("buscador").addEventListener("input", function () {
-      const texto = this.value.toLowerCase();
-      const filtrados = todosLosLibros.filter(libro =>
-        libro.titulo.toLowerCase().includes(texto) ||
-        libro.autor.toLowerCase().includes(texto)
-      );
-      renderizarLibros(filtrados);
-    });
+    // Función para filtrar libros
+function filtrarLibros(busqueda) {
+  const libros = document.querySelectorAll('.book-item');
+  libros.forEach(libro => {
+    const titulo = libro.querySelector('h3').textContent.toLowerCase();
+    const autor = libro.querySelector('p').textContent.toLowerCase();
+    // Filtramos si el texto de búsqueda coincide con el título o autor
+    if (titulo.includes(busqueda.toLowerCase()) || autor.includes(busqueda.toLowerCase())) {
+      libro.style.display = ''; // Mostrar el libro
+    } else {
+      libro.style.display = 'none'; // Ocultar el libro si no coincide
+    }
+  });
+}
+
+// Agregar un event listener para el campo de búsqueda
+document.getElementById('buscador').addEventListener('input', function() {
+  const busqueda = this.value;
+  if (busqueda.trim() === '') {
+    // Si no hay texto, mostrar todos los libros
+    const libros = document.querySelectorAll('.book-item');
+    libros.forEach(libro => libro.style.display = ''); // Mostrar todos los libros
+  } else {
+    // Si hay texto, filtrar libros
+    filtrarLibros(busqueda);
+  }
+});
+
   </script>
 </body>
 </html>
