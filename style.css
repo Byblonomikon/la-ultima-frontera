@@ -1,10 +1,16 @@
+
+/* Estilo global para el body */
 body {
-    font-family: 'Georgia', serif;
-    background-color: #111;  /* Fondo oscuro, en caso de que la imagen no cargue */
-    color: #eee;
-    padding: 20px;
-    
-    /* Añadir imagen de fondo */
+  font-family: 'Georgia', serif;
+  background-color: #111;
+  color: #eee;
+  padding: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centra el contenido horizontalmente */
+
+       /* Añadir imagen de fondo */
     background-image: url('https://wallpapercat.com/w/full/7/6/4/1326128-1920x1200-desktop-hd-book-wallpaper.jpg'); /* Reemplaza con la URL de tu imagen */
     background-size: contain; /* Hace que la imagen cubra todo el fondo */
     background-position: center; /* Centra la imagen en la página */
@@ -12,40 +18,56 @@ body {
     background-repeat: no-repeat; /* Asegura que no se repita la imagen si es más pequeña */
 }
 
-/* Estilos para el contenedor del encabezado */
+/* Estilo para el contenedor del header */
 .header-container {
-  display: flex;           /* Usa Flexbox para alinear los elementos */
-  align-items: center;     /* Alinea verticalmente en el centro */
-  justify-content: flex-start; /* Alinea los elementos al inicio (a la izquierda) */
-    flex-wrap: nowrap;  /* Asegura que los elementos no se muevan a una nueva línea */
+  display: flex;
+  justify-content: center;  /* Centra el logo y el título */
+  align-items: center;      /* Centra verticalmente */
+  margin-bottom: 20px;      /* Separación entre el header y el menú */
 }
 
 .logo {
-  width: 30px;             /* Tamaño del logo */
-  height: auto;            /* Mantén la relación de aspecto del logo */
+  width: 50px;             /* Tamaño del logo, ajusta como necesites */
+  height: auto;
   margin-right: 10px;      /* Espacio entre el logo y el título */
 }
 
 h1 {
   font-size: 2.5rem;       /* Tamaño del título */
   color: var(--accent);    /* Color del título */
+  margin: 0;
 }
 
+/* Estilo del menú de navegación */
+nav {
+  display: flex;
+  justify-content: center;  /* Centra los enlaces en el menú */
+  width: 100%;              /* Asegura que ocupe todo el ancho de la página */
+  background-color: #222;   /* Fondo oscuro para el menú */
+}
 
-h1, h3 {
-    color: #d4af37;
+.nav-links {
+  list-style: none;
+  display: flex;
+  padding: 0;
+  margin: 0;
 }
-a {
-    color: #d4af37;
+
+.nav-links li {
+  margin: 0 15px; /* Espacio entre los enlaces */
 }
-nav a {
-    margin-right: 15px;
-    text-decoration: none;
-    color: #aaa;
+
+.nav-links a {
+  color: #eee;
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: color 0.3s ease;
 }
-nav a.active, nav a:hover {
-    color: #d4af37;
+
+.nav-links a:hover {
+  color: var(--accent);
 }
+
 .book-item {
     background-color: #222;
     padding: 15px;
