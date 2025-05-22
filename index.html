@@ -1,49 +1,85 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>La Última Frontera</title>
   <link href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --background: #1e1e1e;
+      --foreground: #f5f5f5;
+      --accent: #d4af37;
+      --muted: #aaaaaa;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      margin: 0;
       font-family: 'IM Fell DW Pica', serif;
-      background-color: #121212;
-      color: #f5f5f5;
+      background-color: var(--background);
+      color: var(--foreground);
+      line-height: 1.6;
+      padding: 1rem;
     }
+
     header {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 2px solid #444;
+      border-bottom: 1px solid var(--accent);
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
     }
+
     header h1 {
-      margin: 0;
-      color: #d4af37;
+      font-size: 2.5rem;
+      color: var(--accent);
     }
+
     nav a {
-      margin: 0 1rem;
-      color: #f5f5f5;
+      margin-right: 1rem;
       text-decoration: none;
+      color: var(--muted);
     }
+
     nav a:hover {
-      color: #d4af37;
+      color: var(--accent);
     }
+
     section {
-      padding: 2rem;
+      margin-bottom: 2rem;
     }
+
+    h2 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .book-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
     .book-item {
-      background-color: #1e1e1e;
-      margin: 1rem 0;
+      border: 1px solid var(--accent);
       padding: 1rem;
-      border-left: 4px solid #d4af37;
+      background-color: #2a2a2a;
+      border-radius: 8px;
+    }
+
+    footer {
+      border-top: 1px solid var(--accent);
+      padding-top: 1rem;
+      text-align: center;
+      color: var(--muted);
     }
   </style>
 </head>
 <body>
-  <header>
+ <header>
     <h1>La Última Frontera</h1>
     <nav>
       <a href="index.html">Archivo</a>
@@ -52,20 +88,58 @@
       <a href="contacto.html">Contacto</a>
     </nav>
   </header>
+
+
+  <section id="bienvenida">
+    <h2>Bienvenida</h2>
+    <p>
+      La Última Frontera no es una librería, ni un archivo, ni un blog. Es un refugio para libros que importan,
+      aunque ya nadie los busque. Cada libro aquí ha sido elegido con intención. Algunos están a la venta. Otros no.
+      Este proyecto es personal y radicalmente íntimo. Bienvenide a la frontera.
+    </p>
+  </section>
+
   <section id="archivo">
     <h2>Archivo</h2>
     <div class="book-list">
       <div class="book-item">
-        <h3>Leviatán</h3>
-        <p><strong>Autor:</strong> Thomas Hobbes</p>
-        <p>
-          Edición en castellano del clásico del pensamiento político. Una obra fundacional sobre el poder, el contrato social y la naturaleza humana.
-          Este ejemplar pertenece a la colección Biblioteca de Pensamiento Moderno (Ed. Fondo de Cultura Económica).
-        </p>
-        <p><strong>Estado:</strong> Muy bueno</p>
-        <p><strong>Disponible para venta:</strong> No (solo archivo)</p>
-      </div>
+  <h3>Leviatán</h3>
+  <p><strong>Autor:</strong> Thomas Hobbes</p>
+  <p>
+    Edición en castellano del clásico del pensamiento político. Una obra fundacional sobre el poder, el contrato social y la naturaleza humana.
+    Este ejemplar pertenece a la colección Biblioteca de Pensamiento Moderno (Ed. Fondo de Cultura Económica).
+  </p>
+  <p><strong>Estado:</strong> Muy bueno</p>
+  <p><strong>Disponible para venta:</strong> No (solo archivo)</p>
+</div>
+      <!-- Más libros -->
     </div>
   </section>
+
+  <section id="venta">
+    <h2>Libros a la venta</h2>
+    <div class="book-list">
+      <div class="book-item">
+        <h3>Título del Pack</h3>
+        <p>Descripción breve del pack o lote. Precio aproximado.</p>
+      </div>
+      <!-- Más packs o libros sueltos -->
+    </div>
+  </section>
+
+  <section id="blog">
+    <h2>Notas</h2>
+    <p>Próximamente: reflexiones, miniensayos y recomendaciones desde el archivo.</p>
+  </section>
+
+  <section id="contacto">
+    <h2>Contacto</h2>
+    <p>¿Quieres saber más o comprar algún libro? Escríbeme a <a href="mailto:contacto@laultimafrontera.com">contacto@laultimafrontera.com</a>.</p>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 La Última Frontera. Proyecto independiente basado en una colección privada.</p>
+  </footer>
 </body>
 </html>
+
