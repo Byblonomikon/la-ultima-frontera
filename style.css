@@ -11,6 +11,25 @@ body {
     background-attachment: fixed; /* Hace que la imagen de fondo se quede fija al hacer scroll */
 }
 
+/* Estilos para el contenedor del encabezado */
+.header-container {
+  display: flex;           /* Usa Flexbox para alinear los elementos */
+  align-items: center;     /* Alinea verticalmente en el centro */
+  justify-content: flex-start; /* Alinea los elementos al inicio (a la izquierda) */
+}
+
+.logo {
+  width: 50px;             /* Tamaño del logo */
+  height: auto;            /* Mantén la relación de aspecto del logo */
+  margin-right: 10px;      /* Espacio entre el logo y el título */
+}
+
+h1 {
+  font-size: 2.5rem;       /* Tamaño del título */
+  color: var(--accent);    /* Color del título */
+}
+
+
 h1, h3 {
     color: #d4af37;
 }
