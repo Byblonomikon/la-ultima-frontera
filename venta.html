@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Libros en Venta – La Última Frontera</title>
-  <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
@@ -60,20 +60,15 @@
     </nav>
   </header>
 
-   <main>
+  <main>
     <section>
       <input type="text" id="buscador" placeholder="Buscar por título o autor..." />
     </section>
 
-    <section id="archivo-libros" class="book-list"></section>
-  </main>
-  
-  <section>
-    <h2>Libros y lotes en venta</h2>
-    <div id="venta-libros" class="book-list">
+    <section id="venta-libros" class="book-list">
       <!-- Los libros se mostrarán aquí -->
-    </div>
-  </section>
+    </section>
+  </main>
 
   <script type="module">
     // Importar Firebase y las funciones necesarias
@@ -95,8 +90,7 @@
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    // Referencia de los libros en venta
-    const librosRef = ref(database, 'libros_venta');
+    let todosLosLibros = []; // Para almacenar los libros
 
     // Función para renderizar los libros en la página
     function renderizarLibros(libros) {
@@ -126,13 +120,25 @@
       }
     }
 
-    // Escuchar cambios en la base de datos y renderizar los libros
+    // Obtener los libros de Firebase y almacenarlos en `todosLosLibros`
+    const librosRef = ref(database, 'libros_venta');
     onValue(librosRef, (snapshot) => {
       const libros = snapshot.val();
-      renderizarLibros(libros);
+      todosLosLibros = Object.values(libros);  // Convertir los libros en un array
+      renderizarLibros(libros);  // Mostrar los libros
     });
 
+    // Función para filtrar los libros con el buscador
+    document.getElementById("buscador").addEventListener("input", function () {
+      const texto = this.value.toLowerCase();
+      const filtrados = todosLosLibros.filter(libro =>
+        libro.titulo.toLowerCase().includes(texto) ||
+        libro.autor.toLowerCase().includes(texto)
+      );
+      renderizarLibros(filtrados);
+    });
   </script>
 
 </body>
 </html>
+
