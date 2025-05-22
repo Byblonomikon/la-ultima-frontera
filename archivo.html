@@ -26,12 +26,33 @@
     <section id="archivo-libros" class="book-list"></section>
   </main>
 
-  <script>
+  <script type="module">
+    // Importar Firebase y la base de datos
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
+      authDomain: "la-ultima-frontera.firebaseapp.com",
+      databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "la-ultima-frontera",
+      storageBucket: "la-ultima-frontera.firebasestorage.app",
+      messagingSenderId: "802228739297",
+      appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
     let todosLosLibros = [];
 
+    // Función para renderizar los libros en fichas
     function renderizarLibros(libros) {
       const contenedor = document.getElementById('archivo-libros');
-      contenedor.innerHTML = '';
+      contenedor.innerHTML = ''; // Limpiar el contenedor antes de llenarlo
+
       libros.forEach(libro => {
         const div = document.createElement('div');
         div.className = 'book-item';
@@ -50,13 +71,22 @@
       });
     }
 
-    fetch('data/libros.json')
-      .then(response => response.json())
-      .then(libros => {
-        todosLosLibros = libros;
-        renderizarLibros(libros);
-      });
+    // Obtener los libros de Firebase y renderizarlos
+    const librosRef = ref(database, 'libros');
+    onValue(librosRef, (snapshot) => {
+      const libros = snapshot.val();
+      const librosArray = [];
 
+      if (libros) {
+        for (let id in libros) {
+          librosArray.push(libros[id]);
+        }
+      }
+
+      renderizarLibros(librosArray);
+    });
+
+    // Función para filtrar libros por búsqueda
     document.getElementById("buscador").addEventListener("input", function () {
       const texto = this.value.toLowerCase();
       const filtrados = todosLosLibros.filter(libro =>
@@ -68,3 +98,4 @@
   </script>
 </body>
 </html>
+
