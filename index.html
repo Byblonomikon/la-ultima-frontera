@@ -167,17 +167,21 @@
 
     // Función para agregar un libro
     function agregarLibro(titulo, autor) {
-      const librosRef = ref(database, 'libros');
-      const nuevoLibroRef = push(librosRef);
-      set(nuevoLibroRef, {
-        titulo: titulo,
-        autor: autor
-      }).then(() => {
-        alert("Libro agregado con éxito");
-      }).catch((error) => {
-        console.error("Error al agregar el libro:", error);
-      });
-    }
+  const librosRef = ref(database, 'libros');
+  const nuevoLibroRef = push(librosRef);
+  set(nuevoLibroRef, {
+    titulo: titulo,
+    autor: autor
+  }).then(() => {
+    alert("Libro agregado con éxito");
+
+    // 👉 Limpiar los campos
+    document.getElementById('inputTitulo').value = '';
+    document.getElementById('inputAutor').value = '';
+  }).catch((error) => {
+    console.error("Error al agregar el libro:", error);
+  });
+}
 
     // Conectar el botón al evento
     document.getElementById('botonAgregarLibro').addEventListener('click', () => {
