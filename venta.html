@@ -39,20 +39,38 @@
       padding: 1rem;
       border-left: 4px solid #d4af37;
     }
-    .sale-item h3 {
-      margin-bottom: 0.5rem;
-    }
-    .sale-item p {
-      margin: 0.25rem 0;
-    }
-    .precio-input {
-      margin-top: 1rem;
-      padding: 0.5rem;
-      font-size: 1rem;
-      background-color: #333;
+    .book-item {
+      background-color: #2a2a2a;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 8px;
       border: 1px solid #d4af37;
-      color: #fff;
-      border-radius: 5px;
+    }
+    .book-item h3 {
+      color: #d4af37;
+    }
+    .book-item p {
+      color: #bbb;
+    }
+    .book-item input[type="number"] {
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+    }
+    .book-item button {
+      padding: 0.5rem 1rem;
+      background-color: #d4af37;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+    }
+    .book-item button:hover {
+      background-color: #c39c29;
     }
   </style>
 </head>
@@ -67,23 +85,18 @@
       <a href="contacto.html">Contacto</a>
     </nav>
   </header>
-
+  
   <section>
     <h2>Libros y lotes en venta</h2>
-    <p>Selección de lotes temáticos curados a mano. Ingresa el precio para cada libro que desees vender.</p>
-    
-    <!-- Campo para ingresar el precio -->
-    <input type="text" id="inputPrecio" class="precio-input" placeholder="Introduce el precio del libro" />
-    
-    <div id="librosVentaContainer">
-      <!-- Los libros de venta aparecerán aquí -->
+    <div id="venta-libros" class="book-list">
+      <!-- Los libros se mostrarán aquí -->
     </div>
   </section>
 
   <script type="module">
-    // Importar Firebase y la base de datos
+    // Importar Firebase y las funciones necesarias
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
     // Configuración de Firebase
     const firebaseConfig = {
@@ -100,67 +113,56 @@
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    // Contenedor de libros en venta
+    // Referencia de los libros en venta
     const librosRef = ref(database, 'libros_venta');
-    
-    // Función para renderizar los libros en venta
-    function renderizarLibros(libros) {
-      const contenedor = document.getElementById('librosVentaContainer');
-      contenedor.innerHTML = ''; // Limpiar el contenedor antes de llenarlo
 
-      libros.forEach(libro => {
+    // Función para renderizar los libros en la página
+    function renderizarLibros(libros) {
+      const contenedor = document.getElementById('venta-libros');
+      contenedor.innerHTML = '';  // Limpiar la lista antes de agregar los libros
+
+      // Iterar sobre los libros y agregarlos a la lista
+      for (let id in libros) {
+        const libro = libros[id];
+
+        // Crear un div para cada libro
         const div = document.createElement('div');
-        div.className = 'sale-item';
-        
+        div.className = 'book-item';
         div.innerHTML = `
           <h3>${libro.titulo}</h3>
           <p><strong>Autor:</strong> ${libro.autor}</p>
-          <p><strong>Descripción:</strong> ${libro.descripcion}</p>
+          <p>${libro.descripcion}</p>
           <p><strong>Estado:</strong> ${libro.estado}</p>
-          <p><strong>Precio:</strong> ${libro.precio ? libro.precio + ' €' : 'No disponible'}</p>
+          <p><strong>Precio:</strong> ${libro.precio ? libro.precio + '€' : 'No disponible'}</p>
+          <input type="number" id="precio_${id}" placeholder="Introduce el precio">
+          <button onclick="actualizarPrecio('${id}')">Agregar Precio</button>
         `;
         contenedor.appendChild(div);
-      });
+      }
     }
 
-    // Obtener los libros de Firebase y renderizarlos
+    // Función para actualizar el precio del libro
+    function actualizarPrecio(id) {
+      const precio = document.getElementById(`precio_${id}`).value;
+      if (precio) {
+        const libroRef = ref(database, `libros_venta/${id}`);
+        update(libroRef, {
+          precio: parseFloat(precio)
+        }).then(() => {
+          alert("Precio actualizado");
+        }).catch((error) => {
+          console.error("Error al actualizar el precio: ", error);
+        });
+      }
+    }
+
+    // Escuchar cambios en la base de datos y renderizar los libros
     onValue(librosRef, (snapshot) => {
       const libros = snapshot.val();
-      const librosArray = [];
-
-      if (libros) {
-        for (let id in libros) {
-          librosArray.push(libros[id]);
-        }
-      }
-
-      renderizarLibros(librosArray);
+      renderizarLibros(libros || {});
     });
 
-    // Función para actualizar el precio en Firebase
-    document.getElementById('inputPrecio').addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') {
-        const precio = event.target.value;
-        if (precio && !isNaN(precio)) {
-          const libroId = prompt('Introduce el ID del libro para asignar el precio:');
-          
-          if (libroId) {
-            const libroRef = ref(database, 'libros_venta/' + libroId);
-            set(libroRef, {
-              precio: parseFloat(precio)
-            }).then(() => {
-              alert('Precio actualizado con éxito');
-              location.reload(); // Recargar la página para mostrar el nuevo precio
-            }).catch((error) => {
-              console.error("Error al actualizar el precio:", error);
-            });
-          }
-        } else {
-          alert('Por favor, ingresa un precio válido.');
-        }
-      }
-    });
   </script>
+
 </body>
 </html>
-
