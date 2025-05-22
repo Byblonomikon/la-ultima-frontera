@@ -166,24 +166,31 @@
     // Mostrar los libros en tiempo real
   const librosRef = ref(database, 'libros');
 
-  onValue(librosRef, (snapshot) => {
-    const libros = snapshot.val();
-    const listaLibros = document.getElementById('listaLibros');
-    listaLibros.innerHTML = ''; // Limpiar la lista antes de volver a llenarla
+// Escuchar los cambios en la base de datos (en tiempo real)
+onValue(librosRef, (snapshot) => {
+  const libros = snapshot.val();
+  const listaLibros = document.getElementById('listaLibros');
+  listaLibros.innerHTML = '';  // Limpiar la lista antes de llenarla
 
-    // Iterar sobre los libros y agregarlos a la lista
-    for (let id in libros) {
-      const libro = libros[id];
-      const li = document.createElement('li');
-      
-      // Crear un enlace de Google Books basado en el título
-      const enlaceGoogleBooks = `https://books.google.com/?q=${encodeURIComponent(libro.titulo)}`;
-      li.innerHTML = `<strong>${libro.titulo}</strong> de ${libro.autor} - <a href="${enlaceGoogleBooks}" target="_blank">Ver en Google Books</a>`;
-      
-      // Añadir el libro a la lista
-      listaLibros.appendChild(li);
-    }
-  });
+  // Si no hay libros, mostramos un mensaje
+  if (!libros) {
+    listaLibros.innerHTML = "<li>No hay libros agregados aún.</li>";
+    return;
+  }
+
+  // Iterar sobre los libros y agregarlos a la lista
+  for (let id in libros) {
+    const libro = libros[id];
+    const li = document.createElement('li');
+    
+    // Crear un enlace a Google Books con el título
+    const enlaceGoogleBooks = `https://books.google.com/?q=${encodeURIComponent(libro.titulo)}`;
+    li.innerHTML = `<strong>${libro.titulo}</strong> de ${libro.autor} - <a href="${enlaceGoogleBooks}" target="_blank">Ver en Google Books</a>`;
+    
+    // Añadir el libro a la lista
+    listaLibros.appendChild(li);
+  }
+});
    
 </script>
 
