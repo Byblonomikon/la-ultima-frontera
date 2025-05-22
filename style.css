@@ -1,0 +1,26 @@
+body {
+    font-family: 'Georgia', serif;
+    background-color: #111;
+    color: #eee;
+    padding: 20px;
+}
+h1, h3 {
+    color: #d4af37;
+}
+a {
+    color: #d4af37;
+}
+nav a {
+    margin-right: 15px;
+    text-decoration: none;
+    color: #aaa;
+}
+nav a.active, nav a:hover {
+    color: #d4af37;
+}
+.book-item {
+    background-color: #222;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #d4af37;
+}
