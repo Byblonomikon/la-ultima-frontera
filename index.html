@@ -145,51 +145,68 @@
   <button id="botonAgregarLibro">Agregar</button>
 
   <!-- Script de Firebase y lógica para agregar libros -->
-  <script type="module">
-    // Importar Firebase y la base de datos
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+ <script type="module">
+  // Importar Firebase y la base de datos
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-    // Configuración de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
-      authDomain: "la-ultima-frontera.firebaseapp.com",
-      databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "la-ultima-frontera",
-      storageBucket: "la-ultima-frontera.firebasestorage.app",
-      messagingSenderId: "802228739297",
-      appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
-    };
+  // Configuración de Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
+    authDomain: "la-ultima-frontera.firebaseapp.com",
+    databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "la-ultima-frontera",
+    storageBucket: "la-ultima-frontera.firebasestorage.app",
+    messagingSenderId: "802228739297",
+    appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
+  };
 
-    // Inicializar Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+  // Inicializar Firebase
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
 
-    // Función para agregar un libro
-    function agregarLibro(titulo, autor) {
-  const librosRef = ref(database, 'libros');
-  const nuevoLibroRef = push(librosRef);
-  set(nuevoLibroRef, {
-    titulo: titulo,
-    autor: autor
-  }).then(() => {
-    alert("Libro agregado con éxito");
+  // Función para agregar un libro
+  function agregarLibro(titulo, autor) {
+    const librosRef = ref(database, 'libros');
+    const nuevoLibroRef = push(librosRef);
+    set(nuevoLibroRef, {
+      titulo: titulo,
+      autor: autor
+    }).then(() => {
+      alert("Libro agregado con éxito");
 
-    // 👉 Limpiar los campos
-    document.getElementById('inputTitulo').value = '';
-    document.getElementById('inputAutor').value = '';
-  }).catch((error) => {
-    console.error("Error al agregar el libro:", error);
+      // Limpiar los campos
+      document.getElementById('inputTitulo').value = '';
+      document.getElementById('inputAutor').value = '';
+    }).catch((error) => {
+      console.error("Error al agregar el libro:", error);
+    });
+  }
+
+  // Agregar libro con el botón
+  document.getElementById('botonAgregarLibro').addEventListener('click', () => {
+    const titulo = document.getElementById('inputTitulo').value;
+    const autor = document.getElementById('inputAutor').value;
+    agregarLibro(titulo, autor);
   });
-}
 
-    // Conectar el botón al evento
-    document.getElementById('botonAgregarLibro').addEventListener('click', () => {
+  // Agregar libro presionando Enter
+  document.getElementById('inputTitulo').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
       const titulo = document.getElementById('inputTitulo').value;
       const autor = document.getElementById('inputAutor').value;
       agregarLibro(titulo, autor);
-    });
-  </script>
+    }
+  });
+
+  document.getElementById('inputAutor').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      const titulo = document.getElementById('inputTitulo').value;
+      const autor = document.getElementById('inputAutor').value;
+      agregarLibro(titulo, autor);
+    }
+  });
+</script>
 
   
   <footer>
