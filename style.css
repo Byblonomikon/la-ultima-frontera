@@ -1,9 +1,16 @@
 body {
     font-family: 'Georgia', serif;
-    background-color: #111;
+    background-color: #111;  /* Fondo oscuro, en caso de que la imagen no cargue */
     color: #eee;
     padding: 20px;
+    
+    /* Añadir imagen de fondo */
+    background-image: url('https://i.pinimg.com/736x/c5/fc/e2/c5fce2fd96228fb67875207810d909c7.jpg'); /* Reemplaza con la URL de tu imagen */
+    background-size: cover; /* Hace que la imagen cubra todo el fondo */
+    background-position: center; /* Centra la imagen en la página */
+    background-attachment: fixed; /* Hace que la imagen de fondo se quede fija al hacer scroll */
 }
+
 h1, h3 {
     color: #d4af37;
 }
