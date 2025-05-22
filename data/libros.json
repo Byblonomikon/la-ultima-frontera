@@ -1,0 +1,16 @@
+[
+  {
+    "titulo": "Leviatán",
+    "autor": "Thomas Hobbes",
+    "descripcion": "Edición en castellano del clásico del pensamiento político. Una obra fundacional sobre el poder, el contrato social y la naturaleza humana. Este ejemplar pertenece a la colección Biblioteca de Pensamiento Moderno (Ed. Fondo de Cultura Económica).",
+    "estado": "Muy bueno",
+    "venta": false
+  },
+  {
+    "titulo": "1984",
+    "autor": "George Orwell",
+    "descripcion": "Distopía clásica sobre vigilancia, represión y libertad individual. Edición Debolsillo, tapa blanda.",
+    "estado": "Bueno",
+    "venta": true
+  }
+]
