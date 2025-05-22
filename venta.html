@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Libros en Venta – La Última Frontera</title>
-  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
@@ -33,12 +32,6 @@
     section {
       padding: 2rem;
     }
-    .sale-item {
-      background-color: #1e1e1e;
-      margin: 1rem 0;
-      padding: 1rem;
-      border-left: 4px solid #d4af37;
-    }
     .book-item {
       background-color: #2a2a2a;
       padding: 1rem;
@@ -51,26 +44,6 @@
     }
     .book-item p {
       color: #bbb;
-    }
-    .book-item input[type="number"] {
-      padding: 0.5rem;
-      margin-top: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      width: 100%;
-    }
-    .book-item button {
-      padding: 0.5rem 1rem;
-      background-color: #d4af37;
-      border: none;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 0.5rem;
-      border-radius: 4px;
-    }
-    .book-item button:hover {
-      background-color: #c39c29;
     }
   </style>
 </head>
@@ -96,7 +69,7 @@
   <script type="module">
     // Importar Firebase y las funciones necesarias
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
     // Configuración de Firebase
     const firebaseConfig = {
@@ -121,6 +94,11 @@
       const contenedor = document.getElementById('venta-libros');
       contenedor.innerHTML = '';  // Limpiar la lista antes de agregar los libros
 
+      if (!libros) {
+        contenedor.innerHTML = "<p>No hay libros disponibles para la venta.</p>";
+        return;
+      }
+
       // Iterar sobre los libros y agregarlos a la lista
       for (let id in libros) {
         const libro = libros[id];
@@ -134,32 +112,15 @@
           <p>${libro.descripcion}</p>
           <p><strong>Estado:</strong> ${libro.estado}</p>
           <p><strong>Precio:</strong> ${libro.precio ? libro.precio + '€' : 'No disponible'}</p>
-          <input type="number" id="precio_${id}" placeholder="Introduce el precio">
-          <button onclick="actualizarPrecio('${id}')">Agregar Precio</button>
         `;
         contenedor.appendChild(div);
-      }
-    }
-
-    // Función para actualizar el precio del libro
-    function actualizarPrecio(id) {
-      const precio = document.getElementById(`precio_${id}`).value;
-      if (precio) {
-        const libroRef = ref(database, `libros_venta/${id}`);
-        update(libroRef, {
-          precio: parseFloat(precio)
-        }).then(() => {
-          alert("Precio actualizado");
-        }).catch((error) => {
-          console.error("Error al actualizar el precio: ", error);
-        });
       }
     }
 
     // Escuchar cambios en la base de datos y renderizar los libros
     onValue(librosRef, (snapshot) => {
       const libros = snapshot.val();
-      renderizarLibros(libros || {});
+      renderizarLibros(libros);
     });
 
   </script>
