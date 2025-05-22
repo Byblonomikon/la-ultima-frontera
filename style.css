@@ -19,7 +19,7 @@ body {
 }
 
 .logo {
-  width: 50px;             /* Tamaño del logo */
+  width: 30px;             /* Tamaño del logo */
   height: auto;            /* Mantén la relación de aspecto del logo */
   margin-right: 10px;      /* Espacio entre el logo y el título */
 }
