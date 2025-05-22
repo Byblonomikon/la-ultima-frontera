@@ -79,17 +79,16 @@
   </style>
 </head>
 <body>
- <header>
+  <header>
     <h1>La Última Frontera</h1>
-     <nav>
-            <a href="index.html">Inicio</a>
-            <a href="archivo.html" class="active">Archivo</a>
-            <a href="venta.html">Venta</a>
-            <a href="blog.html">Blog</a>
-            <a href="contacto.html">Contacto</a>
-        </nav>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="archivo.html" class="active">Archivo</a>
+      <a href="venta.html">Venta</a>
+      <a href="blog.html">Blog</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
   </header>
-
 
   <section id="bienvenida">
     <h2>Bienvenida</h2>
@@ -99,155 +98,129 @@
       Este proyecto es personal y radicalmente íntimo. Bienvenide a la frontera.
     </p>
   </section>
-  
-  <!-- Script de Firebase y lógica para agregar libros -->
-<script type="module">
-  // Importar Firebase y la base de datos
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-  import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-  // Configuración de Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
-    authDomain: "la-ultima-frontera.firebaseapp.com",
-    databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "la-ultima-frontera",
-    storageBucket: "la-ultima-frontera.firebasestorage.app",
-    messagingSenderId: "802228739297",
-    appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
-  };
-
-  // Inicializar Firebase
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
-
-  // Función para agregar un libro
-  function agregarLibro(titulo, autor) {
-    const librosRef = ref(database, 'libros');
-    const nuevoLibroRef = push(librosRef);
-    set(nuevoLibroRef, {
-      titulo: titulo,
-      autor: autor
-    }).then(() => {
-      alert("Libro agregado con éxito");
-
-      // Limpiar los campos
-      document.getElementById('inputTitulo').value = '';
-      document.getElementById('inputAutor').value = '';
-    }).catch((error) => {
-      console.error("Error al agregar el libro:", error);
-    });
-  }
-
-  // Agregar libro con el botón
-  document.getElementById('botonAgregarLibro').addEventListener('click', () => {
-    const titulo = document.getElementById('inputTitulo').value;
-    const autor = document.getElementById('inputAutor').value;
-    agregarLibro(titulo, autor);
-  });
-
-  // Agregar libro presionando Enter
-  document.getElementById('inputTitulo').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      const titulo = document.getElementById('inputTitulo').value;
-      const autor = document.getElementById('inputAutor').value;
-      agregarLibro(titulo, autor);
-    }
-  });
-
-  document.getElementById('inputAutor').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      const titulo = document.getElementById('inputTitulo').value;
-      const autor = document.getElementById('inputAutor').value;
-      agregarLibro(titulo, autor);
-    }
-  });
-
-  // Mostrar los libros en tiempo real
-  const librosRef = ref(database, 'libros');
-
-  // Escuchar los cambios en la base de datos (en tiempo real)
-  onValue(librosRef, (snapshot) => {
-    const libros = snapshot.val();
-    const listaLibros = document.getElementById('listaLibros');
-    listaLibros.innerHTML = '';  // Limpiar la lista antes de llenarla
-
-    // Si no hay libros, mostramos un mensaje
-    if (!libros) {
-      listaLibros.innerHTML = "<li>No hay libros agregados aún.</li>";
-      return;
-    }
-
-    // Iterar sobre los libros y agregarlos a la lista
-    for (let id in libros) {
-      const libro = libros[id];
-      const li = document.createElement('li');
-      
-      // Crear un enlace a Google Books con el título
-      const enlaceGoogleBooks = `https://books.google.com/?q=${encodeURIComponent(libro.titulo)}`;
-      li.innerHTML = `<strong>${libro.titulo}</strong> de ${libro.autor} - <a href="${enlaceGoogleBooks}" target="_blank">Ver en Google Books</a>`;
-      
-      // Añadir el libro a la lista
-      listaLibros.appendChild(li);
-    }
-  });
-</script>
-
-
+  <!-- Formulario para agregar un libro con título, autor y precio -->
   <h2>Agregar libro</h2>
-<input type="text" id="inputTitulo" placeholder="Título del libro">
-<input type="text" id="inputAutor" placeholder="Autor del libro">
-<button id="botonAgregarLibro">Agregar</button>
+  <input type="text" id="inputTitulo" placeholder="Título del libro">
+  <input type="text" id="inputAutor" placeholder="Autor del libro">
+  <input type="number" id="inputPrecio" placeholder="Precio del libro" min="0">
+  <button id="botonAgregarLibro">Agregar</button>
 
-<h2>Libros Agregados:</h2>
-<ul id="listaLibros">
-  <!-- Los libros se mostrarán aquí -->
-</ul>
+  <h2>Libros Agregados:</h2>
+  <ul id="listaLibros">
+    <!-- Los libros se mostrarán aquí -->
+  </ul>
 
-  
-  <section id="archivo">
-    <h2>Archivo</h2>
-    <div class="book-list">
-      <div class="book-item">
-  <h3>Leviatán</h3>
-  <p><strong>Autor:</strong> Thomas Hobbes</p>
-  <p>
-    Edición en castellano del clásico del pensamiento político. Una obra fundacional sobre el poder, el contrato social y la naturaleza humana.
-    Este ejemplar pertenece a la colección Biblioteca de Pensamiento Moderno (Ed. Fondo de Cultura Económica).
-  </p>
-  <p><strong>Estado:</strong> Muy bueno</p>
-  <p><strong>Disponible para venta:</strong> No (solo archivo)</p>
-</div>
-      <!-- Más libros -->
-    </div>
-  </section>
+  <!-- Script de Firebase y lógica para agregar libros -->
+  <script type="module">
+    // Importar Firebase y la base de datos
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-  <section id="venta">
-    <h2>Libros a la venta</h2>
-    <div class="book-list">
-      <div class="book-item">
-        <h3>Título del Pack</h3>
-        <p>Descripción breve del pack o lote. Precio aproximado.</p>
-      </div>
-      <!-- Más packs o libros sueltos -->
-    </div>
-  </section>
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
+      authDomain: "la-ultima-frontera.firebaseapp.com",
+      databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "la-ultima-frontera",
+      storageBucket: "la-ultima-frontera.firebasestorage.app",
+      messagingSenderId: "802228739297",
+      appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
+    };
 
-  <section id="blog">
-    <h2>Notas</h2>
-    <p>Próximamente: reflexiones, miniensayos y recomendaciones desde el archivo.</p>
-  </section>
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-  <section id="contacto">
-    <h2>Contacto</h2>
-    <p>¿Quieres saber más o comprar algún libro? Escríbeme a <a href="mailto:contacto@laultimafrontera.com">contacto@laultimafrontera.com</a>.</p>
-  </section>
+    // Función para agregar un libro
+    function agregarLibro(titulo, autor, precio) {
+      const librosRef = ref(database, 'libros');
+      const nuevoLibroRef = push(librosRef);
+      set(nuevoLibroRef, {
+        titulo: titulo,
+        autor: autor,
+        precio: precio
+      }).then(() => {
+        alert("Libro agregado con éxito");
 
+        // Limpiar los campos
+        document.getElementById('inputTitulo').value = '';
+        document.getElementById('inputAutor').value = '';
+        document.getElementById('inputPrecio').value = '';
+      }).catch((error) => {
+        console.error("Error al agregar el libro:", error);
+      });
+    }
 
+    // Agregar libro con el botón
+    document.getElementById('botonAgregarLibro').addEventListener('click', () => {
+      const titulo = document.getElementById('inputTitulo').value;
+      const autor = document.getElementById('inputAutor').value;
+      const precio = document.getElementById('inputPrecio').value;
+      if (!titulo || !autor || !precio || isNaN(precio) || parseFloat(precio) <= 0) {
+        alert('Por favor, ingrese título, autor y precio válidos.');
+        return;
+      }
+      agregarLibro(titulo, autor, precio);
+    });
 
+    // Agregar libro presionando Enter
+    document.getElementById('inputTitulo').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const titulo = document.getElementById('inputTitulo').value;
+        const autor = document.getElementById('inputAutor').value;
+        const precio = document.getElementById('inputPrecio').value;
+        if (!titulo || !autor || !precio || isNaN(precio) || parseFloat(precio) <= 0) {
+          alert('Por favor, ingrese título, autor y precio válidos.');
+          return;
+        }
+        agregarLibro(titulo, autor, precio);
+      }
+    });
 
+    document.getElementById('inputAutor').addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        const titulo = document.getElementById('inputTitulo').value;
+        const autor = document.getElementById('inputAutor').value;
+        const precio = document.getElementById('inputPrecio').value;
+        if (!titulo || !autor || !precio || isNaN(precio) || parseFloat(precio) <= 0) {
+          alert('Por favor, ingrese título, autor y precio válidos.');
+          return;
+        }
+        agregarLibro(titulo, autor, precio);
+      }
+    });
 
-  
+    // Mostrar los libros en tiempo real
+    const librosRef = ref(database, 'libros');
+
+    // Escuchar los cambios en la base de datos (en tiempo real)
+    onValue(librosRef, (snapshot) => {
+      const libros = snapshot.val();
+      const listaLibros = document.getElementById('listaLibros');
+      listaLibros.innerHTML = '';  // Limpiar la lista antes de llenarla
+
+      // Si no hay libros, mostramos un mensaje
+      if (!libros) {
+        listaLibros.innerHTML = "<li>No hay libros agregados aún.</li>";
+        return;
+      }
+
+      // Iterar sobre los libros y agregarlos a la lista
+      for (let id in libros) {
+        const libro = libros[id];
+        const li = document.createElement('li');
+        
+        // Crear un enlace a Google Books con el título
+        const enlaceGoogleBooks = `https://books.google.com/?q=${encodeURIComponent(libro.titulo)}`;
+        li.innerHTML = `<strong>${libro.titulo}</strong> de ${libro.autor} - Precio: ${libro.precio}€ - <a href="${enlaceGoogleBooks}" target="_blank">Ver en Google Books</a>`;
+        
+        // Añadir el libro a la lista
+        listaLibros.appendChild(li);
+      }
+    });
+  </script>
+
   <footer>
     <p>&copy; 2025 La Última Frontera. Proyecto independiente basado en una colección privada.</p>
   </footer>
