@@ -8,7 +8,7 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centra el contenido horizontalmente */
+  align-items: left; /* Centra el contenido horizontalmente */
 
        /* Añadir imagen de fondo */
     background-image: url('https://wallpapercat.com/w/full/7/6/4/1326128-1920x1200-desktop-hd-book-wallpaper.jpg'); /* Reemplaza con la URL de tu imagen */
