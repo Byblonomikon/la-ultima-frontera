@@ -5,7 +5,7 @@ body {
     padding: 20px;
     
     /* Añadir imagen de fondo */
-    background-image: url('https://i.pinimg.com/736x/9a/75/66/9a7566197ae6ef9d84d7e72b114b3e71.jpg'); /* Reemplaza con la URL de tu imagen */
+    background-image: url('https://wallpapercat.com/w/full/7/6/4/1326128-1920x1200-desktop-hd-book-wallpaper.jpg'); /* Reemplaza con la URL de tu imagen */
     background-size: contain; /* Hace que la imagen cubra todo el fondo */
     background-position: center; /* Centra la imagen en la página */
     background-attachment: fixed; /* Hace que la imagen de fondo se quede fija al hacer scroll */
