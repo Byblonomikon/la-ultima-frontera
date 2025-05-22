@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -40,22 +39,128 @@
       padding: 1rem;
       border-left: 4px solid #d4af37;
     }
+    .sale-item h3 {
+      margin-bottom: 0.5rem;
+    }
+    .sale-item p {
+      margin: 0.25rem 0;
+    }
+    .precio-input {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      font-size: 1rem;
+      background-color: #333;
+      border: 1px solid #d4af37;
+      color: #fff;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
   <header>
     <h1>La Última Frontera</h1>
-     <nav>
-            <a href="index.html">Inicio</a>
-            <a href="archivo.html" class="active">Archivo</a>
-            <a href="venta.html">Venta</a>
-            <a href="blog.html">Blog</a>
-            <a href="contacto.html">Contacto</a>
-        </nav>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="archivo.html">Archivo</a>
+      <a href="venta.html" class="active">Venta</a>
+      <a href="blog.html">Blog</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
   </header>
+
   <section>
     <h2>Libros y lotes en venta</h2>
-    <p>Próximamente disponibles. Selección de lotes temáticos curados a mano.</p>
+    <p>Selección de lotes temáticos curados a mano. Ingresa el precio para cada libro que desees vender.</p>
+    
+    <!-- Campo para ingresar el precio -->
+    <input type="text" id="inputPrecio" class="precio-input" placeholder="Introduce el precio del libro" />
+    
+    <div id="librosVentaContainer">
+      <!-- Los libros de venta aparecerán aquí -->
+    </div>
   </section>
+
+  <script type="module">
+    // Importar Firebase y la base de datos
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+
+    // Configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
+      authDomain: "la-ultima-frontera.firebaseapp.com",
+      databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "la-ultima-frontera",
+      storageBucket: "la-ultima-frontera.firebasestorage.app",
+      messagingSenderId: "802228739297",
+      appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Contenedor de libros en venta
+    const librosRef = ref(database, 'libros_venta');
+    
+    // Función para renderizar los libros en venta
+    function renderizarLibros(libros) {
+      const contenedor = document.getElementById('librosVentaContainer');
+      contenedor.innerHTML = ''; // Limpiar el contenedor antes de llenarlo
+
+      libros.forEach(libro => {
+        const div = document.createElement('div');
+        div.className = 'sale-item';
+        
+        div.innerHTML = `
+          <h3>${libro.titulo}</h3>
+          <p><strong>Autor:</strong> ${libro.autor}</p>
+          <p><strong>Descripción:</strong> ${libro.descripcion}</p>
+          <p><strong>Estado:</strong> ${libro.estado}</p>
+          <p><strong>Precio:</strong> ${libro.precio ? libro.precio + ' €' : 'No disponible'}</p>
+        `;
+        contenedor.appendChild(div);
+      });
+    }
+
+    // Obtener los libros de Firebase y renderizarlos
+    onValue(librosRef, (snapshot) => {
+      const libros = snapshot.val();
+      const librosArray = [];
+
+      if (libros) {
+        for (let id in libros) {
+          librosArray.push(libros[id]);
+        }
+      }
+
+      renderizarLibros(librosArray);
+    });
+
+    // Función para actualizar el precio en Firebase
+    document.getElementById('inputPrecio').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        const precio = event.target.value;
+        if (precio && !isNaN(precio)) {
+          const libroId = prompt('Introduce el ID del libro para asignar el precio:');
+          
+          if (libroId) {
+            const libroRef = ref(database, 'libros_venta/' + libroId);
+            set(libroRef, {
+              precio: parseFloat(precio)
+            }).then(() => {
+              alert('Precio actualizado con éxito');
+              location.reload(); // Recargar la página para mostrar el nuevo precio
+            }).catch((error) => {
+              console.error("Error al actualizar el precio:", error);
+            });
+          }
+        } else {
+          alert('Por favor, ingresa un precio válido.');
+        }
+      }
+    });
+  </script>
 </body>
 </html>
+
