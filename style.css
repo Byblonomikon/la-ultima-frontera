@@ -16,6 +16,7 @@ body {
   display: flex;           /* Usa Flexbox para alinear los elementos */
   align-items: center;     /* Alinea verticalmente en el centro */
   justify-content: flex-start; /* Alinea los elementos al inicio (a la izquierda) */
+    flex-wrap: nowrap;  /* Asegura que los elementos no se muevan a una nueva línea */
 }
 
 .logo {
