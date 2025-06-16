@@ -14,12 +14,21 @@
       background-color: #121212;
       color: #f5f5f5;
     }
-    header {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 2px solid #444;
-    }
+   <div id="header-placeholder"></div>
+
+<script>
+  fetch("header.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("header-placeholder").innerHTML = data;
+      const path = window.location.pathname.split("/").pop();
+      document.querySelectorAll("nav a").forEach(link => {
+        if (link.getAttribute("href") === path) {
+          link.classList.add("active");
+        }
+      });
+    });
+</script>
     header h1 {
       margin: 0;
       color: #d4af37;
