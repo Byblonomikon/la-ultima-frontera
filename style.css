@@ -29,6 +29,38 @@ body {
   gap: 1rem;
 }
 
+header {
+  background-color: #f8f8f8;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+}
+
+header h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  margin: 0;
+}
+
+nav a {
+  margin-left: 1rem;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #007bff;
+}
+
+nav a.active {
+  color: #007bff;
+  font-weight: 600;
+}
+
 .logo {
   width: 50px;             /* Tamaño del logo, ajusta como necesites */
   height: auto;
@@ -52,27 +84,11 @@ nav {
   border-radius: 12px;
 }
 
-nav a.active {
-  background-color: #222; /* Fondo oscuro o diferente */
-  color: #fff;            /* Texto claro */
-  border-radius: 5px;
-  padding: 0.3em 0.6em;
-  font-weight: bold;
-}
-
-nav a:hover, nav a.active {
-  background-color: var(--accent);
-  color: #000;
-}
 .nav-links {
   list-style: none;
   display: flex;
   padding: 0;
   margin: 0;
-}
-
-.nav-links li {
-  margin: 0 15px; /* Espacio entre los enlaces */
 }
 
 .nav-links a {
@@ -82,9 +98,7 @@ nav a:hover, nav a.active {
   transition: color 0.3s ease;
 }
 
-.nav-links a:hover {
-  color: var(--accent);
-}
+
 
 /* Estilo para el contenido */
 section {
