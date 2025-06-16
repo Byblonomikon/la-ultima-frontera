@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cesta de la Compra – La Última Frontera</title>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'IM Fell DW Pica', serif;
+      background-color: #121212;
+      color: #f5f5f5;
+    }
+    header {
+      background-color: #1e1e1e;
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 2px solid #444;
+    }
+    header h1 {
+      margin: 0;
+      color: #d4af37;
+    }
+    nav a {
+      margin: 0 1rem;
+      color: #f5f5f5;
+      text-decoration: none;
+    }
+    nav a:hover {
+      color: #d4af37;
+    }
+    section {
+      padding: 2rem;
+    }
+    .book-item {
+      background-color: #2a2a2a;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      border: 1px solid #d4af37;
+    }
+    .book-item h3 {
+      color: #d4af37;
+    }
+    .book-item p {
+      color: #bbb;
+    }
+    .acciones {
+      margin-top: 2rem;
+    }
+    button {
+      padding: 0.6rem 1rem;
+      margin-right: 1rem;
+      background-color: #d4af37;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #b58d2d;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>La Última Frontera</h1>
+    <nav>
+      <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+      <a href="archivo.html"><i class="fas fa-book"></i> Archivo</a>
+      <a href="venta.html"><i class="fas fa-dollar-sign"></i> Venta</a>
+      <a href="cesta.html" class="active"><i class="fas fa-shopping-cart"></i> Cesta</a>
+      <a href="blog.html"><i class="fas fa-pen"></i> Blog</a>
+      <a href="contacto.html"><i class="fas fa-envelope"></i> Contacto</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="lista-cesta">
+      <!-- Aquí se listan los libros de la cesta -->
+    </section>
+
+    <section class="acciones">
+      <button onclick="vaciarCesta()">Vaciar Cesta</button>
+      <button onclick="enviarPedido()">Enviar Pedido</button>
+    </section>
+  </main>
+
+  <script>
+    const contenedor = document.getElementById('lista-cesta');
+
+    function cargarCesta() {
+      const cesta = JSON.parse(localStorage.getItem('cesta')) || [];
+
+      contenedor.innerHTML = '';
+
+      if (cesta.length === 0) {
+        contenedor.innerHTML = '<p>Tu cesta está vacía.</p>';
+        return;
+      }
+
+      let total = 0;
+
+      cesta.forEach(libro => {
+        total += parseFloat(libro.precio || 0);
+
+        const div = document.createElement('div');
+        div.className = 'book-item';
+        div.innerHTML = `
+          <h3>${libro.titulo}</h3>
+          <p><strong>Autor:</strong> ${libro.autor}</p>
+          <p><strong>Precio:</strong> ${libro.precio}€</p>
+        `;
+        contenedor.appendChild(div);
+      });
+
+      const totalDiv = document.createElement('div');
+      totalDiv.className = 'book-item';
+      totalDiv.innerHTML = `<h3>Total: ${total.toFixed(2)}€</h3>`;
+      contenedor.appendChild(totalDiv);
+    }
+
+    function vaciarCesta() {
+      if (confirm('¿Seguro que quieres vaciar la cesta?')) {
+        localStorage.removeItem('cesta');
+        cargarCesta();
+      }
+    }
+
+    function enviarPedido() {
+      const cesta = JSON.parse(localStorage.getItem('cesta')) || [];
+
+      if (cesta.length === 0) {
+        alert('Tu cesta está vacía.');
+        return;
+      }
+
+      const resumen = cesta.map(libro => `${libro.titulo} (${libro.precio}€)`).join('\n');
+      alert('Pedido enviado (simulado):\n\n' + resumen);
+
+      localStorage.removeItem('cesta');
+      cargarCesta();
+    }
+
+    cargarCesta();
+  </script>
+</body>
+</html>
