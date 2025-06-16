@@ -82,113 +82,83 @@
     </section>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
-      authDomain: "la-ultima-frontera.firebaseapp.com",
-      databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "la-ultima-frontera",
-      storageBucket: "la-ultima-frontera.appspot.com",
-      messagingSenderId: "802228739297",
-      appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
+    authDomain: "la-ultima-frontera.firebaseapp.com",
+    databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "la-ultima-frontera",
+    storageBucket: "la-ultima-frontera.appspot.com",
+    messagingSenderId: "802228739297",
+    appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const librosRef = ref(db, 'libros');
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const librosRef = ref(db, 'libros');
 
-    const contenedor = document.getElementById('venta-libros');
-    const buscador = document.getElementById('buscador');
-
-    function renderizarLibros(libros) {
   const contenedor = document.getElementById('venta-libros');
-  contenedor.innerHTML = '';  // Limpiar la lista antes de agregar los libros
+  const buscador = document.getElementById('buscador');
 
-  if (!libros) {
-    contenedor.innerHTML = "<p>No hay libros disponibles para la venta.</p>";
-    return;
-  }
+  function renderizarLibros(libros) {
+    contenedor.innerHTML = '';  // Limpiar antes de renderizar
 
-  for (let id in libros) {
-    const libro = libros[id];
-
-    const div = document.createElement('div');
-    div.className = 'book-item';
-   div.innerHTML = `
-  <h3>${libro.titulo}</h3>
-  <p><strong>Autor:</strong> ${libro.autor}</p>
-  <p>${libro.descripcion}</p>
-  <p><strong>Estado:</strong> ${libro.estado}</p>
-  <p><strong>Precio:</strong> ${libro.precio ? libro.precio + '€' : 'No disponible'}</p>
-  <input type="number" id="precio-${id}" placeholder="Añadir precio" />
-  <button onclick="actualizarPrecio('${id}')">Actualizar Precio</button>
-  ${libro.precio ? `<button onclick="añadirACesta('${id}', \`${libro.titulo}\`, \`${libro.autor}\`, \`${libro.precio}\`)">Añadir a la cesta</button>` : ''}
-`;
-    contenedor.appendChild(div);
-  }
-}
-
-    window.añadirACesta = function(id, titulo, autor, precio) {
-  const libro = { id, titulo, autor, precio };
-  let cesta = JSON.parse(localStorage.getItem('cesta')) || [];
-
-  if (cesta.some(item => item.id === id)) {
-    alert('Este libro ya está en la cesta.');
-    return;
-  }
-
-  cesta.push(libro);
-  localStorage.setItem('cesta', JSON.stringify(cesta));
-  alert('Libro añadido a la cesta.');
-}
-
-
-      function añadirACesta(id, libroData) {
-  let cesta = JSON.parse(localStorage.getItem('cesta')) || [];
-
-  // Evitar duplicados
-  if (cesta.find(item => item.id === id)) {
-    alert('Este libro ya está en la cesta.');
-    return;
-  }
-
-  cesta.push({ id, ...libroData });
-  localStorage.setItem('cesta', JSON.stringify(cesta));
-  alert(`"${libroData.titulo}" añadido a la cesta.`);
-}
-
-      resultados.forEach(([id, libro]) => {
-        const div = document.createElement('div');
-        div.className = 'book-item';
-        div.innerHTML = `
-          <h3>${libro.titulo}</h3>
-          <p><strong>Autor:</strong> ${libro.autor}</p>
-          <p>${libro.descripcion || ''}</p>
-          <p><strong>Estado:</strong> ${libro.estado || 'Desconocido'}</p>
-          <p><strong>Precio:</strong> ${libro.precio}€</p>
-        `;
-        contenedor.appendChild(div);
-      });
+    if (!libros || Object.keys(libros).length === 0) {
+      contenedor.innerHTML = "<p>No hay libros disponibles para la venta.</p>";
+      return;
     }
 
-    onValue(librosRef, snapshot => {
-      const datos = snapshot.val() || {};
-      renderizar(datos);
+    for (let id in libros) {
+      const libro = libros[id];
+      if (!libro.precio) continue;  // Mostrar solo libros con precio
 
-      buscador.addEventListener('input', () => {
-        const filtro = buscador.value.toLowerCase();
-        const filtrados = Object.fromEntries(
-          Object.entries(datos).filter(([_, libro]) =>
-            (libro.titulo + libro.autor).toLowerCase().includes(filtro) && libro.precio
-          )
-        );
-        renderizar(filtrados);
-      });
+      const div = document.createElement('div');
+      div.className = 'book-item';
+      div.innerHTML = `
+        <h3>${libro.titulo}</h3>
+        <p><strong>Autor:</strong> ${libro.autor}</p>
+        <p>${libro.descripcion || ''}</p>
+        <p><strong>Estado:</strong> ${libro.estado || 'Desconocido'}</p>
+        <p><strong>Precio:</strong> ${libro.precio}€</p>
+        <button onclick="añadirACesta('${id}', \`${libro.titulo}\`, \`${libro.autor}\`, \`${libro.precio}\`)">Añadir a la cesta</button>
+      `;
+      contenedor.appendChild(div);
+    }
+  }
+
+  onValue(librosRef, snapshot => {
+    const datos = snapshot.val() || {};
+    renderizarLibros(datos);
+
+    buscador.addEventListener('input', () => {
+      const filtro = buscador.value.toLowerCase();
+      const filtrados = Object.fromEntries(
+        Object.entries(datos).filter(([_, libro]) =>
+          (libro.titulo + libro.autor).toLowerCase().includes(filtro) && libro.precio
+        )
+      );
+      renderizarLibros(filtrados);
     });
-  </script>
+  });
+
+  window.añadirACesta = function(id, titulo, autor, precio) {
+    const libro = { id, titulo, autor, precio };
+    let cesta = JSON.parse(localStorage.getItem('cesta')) || [];
+
+    if (cesta.some(item => item.id === id)) {
+      alert('Este libro ya está en la cesta.');
+      return;
+    }
+
+    cesta.push(libro);
+    localStorage.setItem('cesta', JSON.stringify(cesta));
+    alert(`"${titulo}" añadido a la cesta.`);
+  };
+</script>
+
 </body>
 </html>
 
