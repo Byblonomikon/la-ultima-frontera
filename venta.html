@@ -121,6 +121,20 @@
   contenedor.appendChild(div);
 }
 
+      function añadirACesta(id, libroData) {
+  let cesta = JSON.parse(localStorage.getItem('cesta')) || [];
+
+  // Evitar duplicados
+  if (cesta.find(item => item.id === id)) {
+    alert('Este libro ya está en la cesta.');
+    return;
+  }
+
+  cesta.push({ id, ...libroData });
+  localStorage.setItem('cesta', JSON.stringify(cesta));
+  alert(`"${libroData.titulo}" añadido a la cesta.`);
+}
+
       resultados.forEach(([id, libro]) => {
         const div = document.createElement('div');
         div.className = 'book-item';
