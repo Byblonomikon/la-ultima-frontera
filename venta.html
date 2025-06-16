@@ -103,25 +103,33 @@
     const contenedor = document.getElementById('venta-libros');
     const buscador = document.getElementById('buscador');
 
-    function renderizar(libros) {
-      for (let id in libros) {
-  const libro = libros[id];
+    function renderizarLibros(libros) {
+  const contenedor = document.getElementById('venta-libros');
+  contenedor.innerHTML = '';  // Limpiar la lista antes de agregar los libros
 
-  // Solo mostrar libros con precio definido
-  if (!libro.precio) continue;
+  if (!libros) {
+    contenedor.innerHTML = "<p>No hay libros disponibles para la venta.</p>";
+    return;
+  }
 
-  const div = document.createElement('div');
-  div.className = 'book-item';
-  div.innerHTML = `
-    <h3>${libro.titulo}</h3>
-    <p><strong>Autor:</strong> ${libro.autor}</p>
-    <p>${libro.descripcion}</p>
-    <p><strong>Estado:</strong> ${libro.estado}</p>
-    <p><strong>Precio:</strong> ${libro.precio}€</p>
-    <button onclick="añadirACesta('${id}', ${JSON.stringify(libro).replace(/"/g, '&quot;')})">Añadir a la cesta</button>
-  `;
-  contenedor.appendChild(div);
+  for (let id in libros) {
+    const libro = libros[id];
+
+    const div = document.createElement('div');
+    div.className = 'book-item';
+    div.innerHTML = `
+      <h3>${libro.titulo}</h3>
+      <p><strong>Autor:</strong> ${libro.autor}</p>
+      <p>${libro.descripcion}</p>
+      <p><strong>Estado:</strong> ${libro.estado}</p>
+      <p><strong>Precio:</strong> ${libro.precio ? libro.precio + '€' : 'No disponible'}</p>
+      <input type="number" id="precio-${id}" placeholder="Añadir precio" />
+      <button onclick="actualizarPrecio('${id}')">Actualizar Precio</button>
+    `;
+    contenedor.appendChild(div);
+  }
 }
+
 
       function añadirACesta(id, libroData) {
   let cesta = JSON.parse(localStorage.getItem('cesta')) || [];
