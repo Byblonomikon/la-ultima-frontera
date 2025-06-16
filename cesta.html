@@ -94,6 +94,16 @@
     </section>
   </main>
 
+  <form id="pedido-form">
+  <h3>Datos del comprador</h3>
+  <input type="text" name="name" placeholder="Nombre" required />
+  <input type="email" name="email" placeholder="Correo electrónico" required />
+  <input type="text" name="direccion" placeholder="Dirección de envío" required />
+  <textarea name="mensaje" placeholder="Mensaje adicional (opcional)"></textarea>
+  <button type="submit">Tramitar pedido</button>
+</form>
+
+
   <script>
     const contenedor = document.getElementById('lista-cesta');
 
