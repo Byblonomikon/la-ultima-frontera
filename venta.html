@@ -103,7 +103,8 @@
 
     function renderizar(libros) {
       contenedor.innerHTML = '';
-      const resultados = Object.entries(libros).filter(([id, libro]) => libro.precio);
+      const resultados = Object.entries(libros).filter(([id, libro]) => libro.precio !== undefined && libro.precio !== null && libro.precio !== "");
+
 
       if (resultados.length === 0) {
         contenedor.innerHTML = "<p>No hay libros en venta actualmente.</p>";
