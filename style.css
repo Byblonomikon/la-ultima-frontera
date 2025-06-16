@@ -52,11 +52,12 @@ nav {
   border-radius: 12px;
 }
 
-nav a {
-  font-weight: bold;
-  padding: 0.5rem 1rem;
+nav a.active {
+  background-color: #222; /* Fondo oscuro o diferente */
+  color: #fff;            /* Texto claro */
   border-radius: 5px;
-  transition: background 0.3s;
+  padding: 0.3em 0.6em;
+  font-weight: bold;
 }
 
 nav a:hover, nav a.active {
