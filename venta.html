@@ -102,14 +102,24 @@
     const buscador = document.getElementById('buscador');
 
     function renderizar(libros) {
-      contenedor.innerHTML = '';
-      const resultados = Object.entries(libros).filter(([id, libro]) => libro.precio !== undefined && libro.precio !== null && libro.precio !== "");
+      for (let id in libros) {
+  const libro = libros[id];
 
+  // Solo mostrar libros con precio definido
+  if (!libro.precio) continue;
 
-      if (resultados.length === 0) {
-        contenedor.innerHTML = "<p>No hay libros en venta actualmente.</p>";
-        return;
-      }
+  const div = document.createElement('div');
+  div.className = 'book-item';
+  div.innerHTML = `
+    <h3>${libro.titulo}</h3>
+    <p><strong>Autor:</strong> ${libro.autor}</p>
+    <p>${libro.descripcion}</p>
+    <p><strong>Estado:</strong> ${libro.estado}</p>
+    <p><strong>Precio:</strong> ${libro.precio}€</p>
+    <button onclick="añadirACesta('${id}', ${JSON.stringify(libro).replace(/"/g, '&quot;')})">Añadir a la cesta</button>
+  `;
+  contenedor.appendChild(div);
+}
 
       resultados.forEach(([id, libro]) => {
         const div = document.createElement('div');
