@@ -131,6 +131,20 @@
   }
 }
 
+    window.añadirACesta = function(id, titulo, autor, precio) {
+  const libro = { id, titulo, autor, precio };
+  let cesta = JSON.parse(localStorage.getItem('cesta')) || [];
+
+  if (cesta.some(item => item.id === id)) {
+    alert('Este libro ya está en la cesta.');
+    return;
+  }
+
+  cesta.push(libro);
+  localStorage.setItem('cesta', JSON.stringify(cesta));
+  alert('Libro añadido a la cesta.');
+}
+
 
       function añadirACesta(id, libroData) {
   let cesta = JSON.parse(localStorage.getItem('cesta')) || [];
