@@ -117,15 +117,16 @@
 
     const div = document.createElement('div');
     div.className = 'book-item';
-    div.innerHTML = `
-      <h3>${libro.titulo}</h3>
-      <p><strong>Autor:</strong> ${libro.autor}</p>
-      <p>${libro.descripcion}</p>
-      <p><strong>Estado:</strong> ${libro.estado}</p>
-      <p><strong>Precio:</strong> ${libro.precio ? libro.precio + '€' : 'No disponible'}</p>
-      <input type="number" id="precio-${id}" placeholder="Añadir precio" />
-      <button onclick="actualizarPrecio('${id}')">Actualizar Precio</button>
-    `;
+   div.innerHTML = `
+  <h3>${libro.titulo}</h3>
+  <p><strong>Autor:</strong> ${libro.autor}</p>
+  <p>${libro.descripcion}</p>
+  <p><strong>Estado:</strong> ${libro.estado}</p>
+  <p><strong>Precio:</strong> ${libro.precio ? libro.precio + '€' : 'No disponible'}</p>
+  <input type="number" id="precio-${id}" placeholder="Añadir precio" />
+  <button onclick="actualizarPrecio('${id}')">Actualizar Precio</button>
+  ${libro.precio ? `<button onclick="añadirACesta('${id}', \`${libro.titulo}\`, \`${libro.autor}\`, \`${libro.precio}\`)">Añadir a la cesta</button>` : ''}
+`;
     contenedor.appendChild(div);
   }
 }
