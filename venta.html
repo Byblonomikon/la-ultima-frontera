@@ -32,39 +32,32 @@
     nav a:hover {
       color: #d4af37;
     }
-    section {
+    main {
       padding: 2rem;
     }
+    #buscador {
+      padding: 0.5rem;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 2rem;
+    }
     .book-item {
-      background-color: #2a2a2a;
+      background-color: #1e1e1e;
       padding: 1rem;
       margin: 1rem 0;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #d4af37;
+      transition: background-color 0.3s;
+    }
+    .book-item:hover {
+      background-color: #2a2a2a;
     }
     .book-item h3 {
       color: #d4af37;
+      margin-top: 0;
     }
     .book-item p {
-      color: #bbb;
-    }
-    input[type="number"] {
-      padding: 0.5rem;
-      margin-top: 1rem;
-      width: 100%;
-      max-width: 200px;
-    }
-    button {
-      padding: 0.5rem;
-      background-color: #d4af37;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 0.5rem;
-      border-radius: 5px;
-    }
-    button:hover {
-      background-color: #b58d2d;
+      margin: 0.5rem 0;
     }
   </style>
 </head>
@@ -72,100 +65,78 @@
   <header>
     <h1>La Última Frontera</h1>
     <nav>
-       <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
-        <a href="archivo.html" class="active"><i class="fas fa-book"></i> Archivo</a>
-        <a href="venta.html"><i class="fas fa-dollar-sign"></i> Venta</a>
-        <a href="blog.html"><i class="fas fa-pen"></i> Blog</a>
-        <a href="contacto.html"><i class="fas fa-envelope"></i> Contacto</a>
+      <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
+      <a href="archivo.html"><i class="fas fa-book"></i> Archivo</a>
+      <a href="venta.html" class="active"><i class="fas fa-dollar-sign"></i> Venta</a>
+      <a href="blog.html"><i class="fas fa-pen"></i> Blog</a>
+      <a href="contacto.html"><i class="fas fa-envelope"></i> Contacto</a>
     </nav>
   </header>
 
   <main>
-    <section>
-      <input type="text" id="buscador" placeholder="Buscar por título o autor..." />
-    </section>
-
+    <input type="text" id="buscador" placeholder="Buscar por título o autor..." />
     <section id="venta-libros" class="book-list">
-      <!-- Los libros en venta aparecerán aquí -->
+      <!-- Aquí aparecerán los libros en venta -->
     </section>
   </main>
 
   <script type="module">
-    // Importar Firebase y las funciones necesarias
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
       authDomain: "la-ultima-frontera.firebaseapp.com",
       databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "la-ultima-frontera",
-      storageBucket: "la-ultima-frontera.firebasestorage.app",
+      storageBucket: "la-ultima-frontera.appspot.com",
       messagingSenderId: "802228739297",
       appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    const db = getDatabase(app);
+    const librosRef = ref(db, 'libros');
 
-    const librosRef = ref(database, 'libros_venta');
+    const contenedor = document.getElementById('venta-libros');
+    const buscador = document.getElementById('buscador');
 
-    // Función para renderizar los libros en la página
-    function renderizarLibros(libros) {
-      const contenedor = document.getElementById('venta-libros');
-      contenedor.innerHTML = '';  // Limpiar la lista antes de agregar los libros
+    function renderizar(libros) {
+      contenedor.innerHTML = '';
+      const resultados = Object.entries(libros).filter(([id, libro]) => libro.precio);
 
-      if (!libros) {
-        contenedor.innerHTML = "<p>No hay libros disponibles para la venta.</p>";
+      if (resultados.length === 0) {
+        contenedor.innerHTML = "<p>No hay libros en venta actualmente.</p>";
         return;
       }
 
-      for (let id in libros) {
-        const libro = libros[id];
-
-        // Crear un div para cada libro
+      resultados.forEach(([id, libro]) => {
         const div = document.createElement('div');
         div.className = 'book-item';
         div.innerHTML = `
           <h3>${libro.titulo}</h3>
           <p><strong>Autor:</strong> ${libro.autor}</p>
-          <p>${libro.descripcion}</p>
-          <p><strong>Estado:</strong> ${libro.estado}</p>
-          <p><strong>Precio:</strong> ${libro.precio ? libro.precio + '€' : 'No disponible'}</p>
-          <input type="number" id="precio-${id}" placeholder="Añadir precio" />
-          <button onclick="actualizarPrecio('${id}')">Actualizar Precio</button>
+          <p>${libro.descripcion || ''}</p>
+          <p><strong>Estado:</strong> ${libro.estado || 'Desconocido'}</p>
+          <p><strong>Precio:</strong> ${libro.precio}€</p>
         `;
         contenedor.appendChild(div);
-      }
-    }
-
-    // Función para actualizar el precio
-    function actualizarPrecio(id) {
-      const precioInput = document.getElementById(`precio-${id}`);
-      const nuevoPrecio = precioInput.value;
-
-      if (!nuevoPrecio || isNaN(nuevoPrecio) || nuevoPrecio <= 0) {
-        alert('Por favor ingresa un precio válido');
-        return;
-      }
-
-      const libroRef = ref(database, `libros_venta/${id}`);
-
-      update(libroRef, {
-        precio: nuevoPrecio
-      }).then(() => {
-        alert('Precio actualizado');
-      }).catch(error => {
-        console.error('Error al actualizar precio:', error);
       });
     }
 
-    // Escuchar cambios en la base de datos y renderizar los libros
-    onValue(librosRef, (snapshot) => {
-      const libros = snapshot.val();
-      renderizarLibros(libros);
+    onValue(librosRef, snapshot => {
+      const datos = snapshot.val() || {};
+      renderizar(datos);
+
+      buscador.addEventListener('input', () => {
+        const filtro = buscador.value.toLowerCase();
+        const filtrados = Object.fromEntries(
+          Object.entries(datos).filter(([_, libro]) =>
+            (libro.titulo + libro.autor).toLowerCase().includes(filtro) && libro.precio
+          )
+        );
+        renderizar(filtrados);
+      });
     });
   </script>
 </body>
