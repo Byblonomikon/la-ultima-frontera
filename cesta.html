@@ -162,5 +162,38 @@
 
     cargarCesta();
   </script>
+
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script>
+  emailjs.init("XaW3zyfmcQShbR9Nr"); // pon tu clave pública aquí
+
+  document.getElementById("pedido-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const form = this;
+    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+    const pedidoResumen = carrito.map(libro => `- ${libro.titulo} (${libro.autor})`).join('\n');
+
+    const templateParams = {
+      name: form.name.value,
+      email: form.email.value,
+      direccion: form.direccion.value,
+      mensaje: form.mensaje.value,
+      pedido: pedidoResumen
+    };
+
+    emailjs.send("service_cyzatnf", "template_hzgvgmm", templateParams)
+      .then(() => {
+        alert("Pedido enviado correctamente. Gracias por tu compra.");
+        form.reset();
+        localStorage.removeItem("carrito");
+      }, (error) => {
+        alert("Error al enviar el pedido. Intenta de nuevo.");
+        console.error(error);
+      });
+  });
+</script>
+
 </body>
 </html>
