@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Archivo – La Última Frontera</title>
   <link href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -13,27 +13,25 @@
     <h2>La Última Frontera</h2>
     <nav>
       <a href="index.html"><i class="fas fa-home"></i> Inicio</a>
-        <a href="archivo.html" class="active"><i class="fas fa-book"></i> Archivo</a>
-        <a href="venta.html"><i class="fas fa-dollar-sign"></i> Venta</a>
-        <a href="blog.html"><i class="fas fa-pen"></i> Blog</a>
-        <a href="contacto.html"><i class="fas fa-envelope"></i> Contacto</a>
+      <a href="archivo.html" class="active"><i class="fas fa-book"></i> Archivo</a>
+      <a href="venta.html"><i class="fas fa-dollar-sign"></i> Venta</a>
+      <a href="blog.html"><i class="fas fa-pen"></i> Blog</a>
+      <a href="contacto.html"><i class="fas fa-envelope"></i> Contacto</a>
     </nav>
   </header>
 
-  <main>
-    <section>
-      <input type="text" id="buscador" placeholder="Buscar por título o autor..." />
+  <main class="archivo">
+    <section class="busqueda">
+      <input type="text" id="buscador" placeholder="Buscar por título o autor..." aria-label="Buscar libros"/>
     </section>
 
     <section id="archivo-libros" class="book-list"></section>
   </main>
 
   <script type="module">
-    // Importar Firebase y la base de datos
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-    // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
       authDomain: "la-ultima-frontera.firebaseapp.com",
@@ -44,21 +42,17 @@
       appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    let todosLosLibros = [];
-
-    // Función para renderizar los libros en fichas
     function renderizarLibros(libros) {
       const contenedor = document.getElementById('archivo-libros');
-      contenedor.innerHTML = ''; // Limpiar el contenedor antes de llenarlo
+      contenedor.innerHTML = '';
 
       libros.forEach(libro => {
         const div = document.createElement('div');
         div.className = 'book-item';
-        // Si el libro tiene un precio, mostrarlo, si no, mostrar "No disponible"
+
         const precioTexto = libro.precio ? `Precio: ${libro.precio}€` : "Precio no disponible";
         const ventaTexto = libro.venta ? "Sí" : "No (solo archivo)";
         const enlaceGoogle = `https://www.google.com/search?tbm=bks&q=${encodeURIComponent(libro.titulo + " " + libro.autor)}`;
@@ -72,11 +66,11 @@
           <p><strong>${precioTexto}</strong></p>
           <p><a href="${enlaceGoogle}" target="_blank">Ver en Google Books</a></p>
         `;
+
         contenedor.appendChild(div);
       });
     }
 
-    // Obtener los libros de Firebase y renderizarlos
     const librosRef = ref(database, 'libros');
     onValue(librosRef, (snapshot) => {
       const libros = snapshot.val();
@@ -91,34 +85,30 @@
       renderizarLibros(librosArray);
     });
 
-    // Función para filtrar libros
-function filtrarLibros(busqueda) {
-  const libros = document.querySelectorAll('.book-item');
-  libros.forEach(libro => {
-    const titulo = libro.querySelector('h3').textContent.toLowerCase();
-    const autor = libro.querySelector('p').textContent.toLowerCase();
-    // Filtramos si el texto de búsqueda coincide con el título o autor
-    if (titulo.includes(busqueda.toLowerCase()) || autor.includes(busqueda.toLowerCase())) {
-      libro.style.display = ''; // Mostrar el libro
-    } else {
-      libro.style.display = 'none'; // Ocultar el libro si no coincide
+    function filtrarLibros(busqueda) {
+      const libros = document.querySelectorAll('.book-item');
+      libros.forEach(libro => {
+        const titulo = libro.querySelector('h3').textContent.toLowerCase();
+        const autor = libro.querySelector('p').textContent.toLowerCase();
+
+        if (titulo.includes(busqueda.toLowerCase()) || autor.includes(busqueda.toLowerCase())) {
+          libro.style.display = '';
+        } else {
+          libro.style.display = 'none';
+        }
+      });
     }
-  });
-}
 
-// Agregar un event listener para el campo de búsqueda
-document.getElementById('buscador').addEventListener('input', function() {
-  const busqueda = this.value;
-  if (busqueda.trim() === '') {
-    // Si no hay texto, mostrar todos los libros
-    const libros = document.querySelectorAll('.book-item');
-    libros.forEach(libro => libro.style.display = ''); // Mostrar todos los libros
-  } else {
-    // Si hay texto, filtrar libros
-    filtrarLibros(busqueda);
-  }
-});
+    document.getElementById('buscador').addEventListener('input', function () {
+      const busqueda = this.value;
+      const libros = document.querySelectorAll('.book-item');
 
+      if (busqueda.trim() === '') {
+        libros.forEach(libro => libro.style.display = '');
+      } else {
+        filtrarLibros(busqueda);
+      }
+    });
   </script>
 </body>
 </html>
