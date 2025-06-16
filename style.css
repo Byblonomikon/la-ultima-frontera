@@ -1,11 +1,13 @@
 
 /* Estilo global para el body */
 body {
-  font-family: 'Georgia', serif;
-  background-color: #111;
-  color: #eee;
-  padding: 20px;
-  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #121212;
+  color: #eaeaea;
+  line-height: 1.8;
+  padding: 2rem;
+  max-width: 960px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: left; /* Centra el contenido horizontalmente */
@@ -24,6 +26,7 @@ body {
   justify-content: center;  /* Centra el logo y el título */
   align-items: center;      /* Centra verticalmente */
   margin-bottom: 20px;      /* Separación entre el header y el menú */
+  gap: 1rem;
 }
 
 .logo {
@@ -41,11 +44,25 @@ h1 {
 /* Estilo del menú de navegación */
 nav {
   display: flex;
-  justify-content: center;  /* Centra los enlaces en el menú */
-  width: 100%;              /* Asegura que ocupe todo el ancho de la página */
-  background-color: #222;   /* Fondo oscuro para el menú */
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 12px;
 }
 
+nav a {
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+nav a:hover, nav a.active {
+  background-color: var(--accent);
+  color: #000;
+}
 .nav-links {
   list-style: none;
   display: flex;
@@ -78,8 +95,49 @@ section {
   line-height: 1.6;            /* Espaciado entre líneas */
 }
 .book-item {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
     background-color: #222;
     padding: 15px;
     margin-bottom: 20px;
     border-left: 4px solid #d4af37;
+}
+.book-item:hover {
+  transform: scale(1.02);
+}
+
+:root {
+  --background: #121212;
+  --foreground: #f0f0f0;
+  --accent: #f4b400;  /* dorado más brillante */
+  --muted: #888;
+}
+
+input, button {
+  padding: 0.8rem;
+  border-radius: 6px;
+  border: none;
+  margin: 0.5rem 0;
+  width: 100%;
+  max-width: 400px;
+}
+
+input:focus, button:hover {
+  outline: 2px solid var(--accent);
+  background-color: #333;
+}
+
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2rem;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+body, nav, .book-item, button {
+  transition: all 0.3s ease;
 }
