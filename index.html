@@ -1,270 +1,53 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>La Última Frontera</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-   <style>
-    body {
-      margin: 0;
-      font-family: 'IM Fell DW Pica', serif;
-      background-color: #121212;
-      color: #f5f5f5;
-    }
-    header {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 2px solid #444;
-    }
-    header h1 {
-      margin: 0;
-      color: #d4af37;
-    }
-    nav a {
-      margin: 0 1rem;
-      color: #f5f5f5;
-      text-decoration: none;
-    }
-    nav a:hover {
-      color: #d4af37;
-    }
-    main {
-      padding: 2rem;
-    }
-    #buscador {
-      padding: 0.5rem;
-      width: 100%;
-      max-width: 400px;
-      margin-bottom: 2rem;
-    }
-    .book-item {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 10px;
-      border: 1px solid #d4af37;
-      transition: background-color 0.3s;
-    }
-    .book-item:hover {
-      background-color: #2a2a2a;
-    }
-    .book-item h3 {
-      color: #d4af37;
-      margin-top: 0;
-    }
-    .book-item p {
-      margin: 0.5rem 0;
-    }
-  </style>
 </head>
 <body>
- <div id="header-placeholder"></div>
+  <div class="page">
+    <div id="header-placeholder"></div>
 
-<script>
-  fetch("header.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("header-placeholder").innerHTML = data;
-      const path = window.location.pathname.split("/").pop();
-      document.querySelectorAll("nav a").forEach(link => {
-        if (link.getAttribute("href") === path) {
-          link.classList.add("active");
-        }
+    <section class="hero">
+      <h1>Una llibreria-arxiu més moderna, viva i interactiva</h1>
+      <p>Hem renovat l'experiència per facilitar la descoberta de llibres, la compra directa i la connexió amb una comunitat lectora crítica.</p>
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <section>
+      <h2>Selecció destacada</h2>
+      <div class="grid" id="featured"></div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    app.loadHeader();
+
+    app.getBooks().then((books) => {
+      const stats = document.getElementById('stats');
+      const enVenta = books.filter((b) => b.venta).length;
+      stats.innerHTML = `
+        <div class="stat"><strong>${books.length}</strong>Total llibres</div>
+        <div class="stat"><strong>${enVenta}</strong>Disponibles en venda</div>
+        <div class="stat"><strong>24h</strong>Resposta habitual</div>
+      `;
+
+      const featured = document.getElementById('featured');
+      books.slice(0, 3).forEach((book) => {
+        const card = document.createElement('article');
+        card.className = 'card book-item';
+        card.innerHTML = `
+          <h3>${book.titulo}</h3>
+          <p><strong>Autor:</strong> ${book.autor}</p>
+          <p>${book.descripcion}</p>
+        `;
+        featured.appendChild(card);
       });
-    });
-</script>
-
-
-
-    <h2>Bienvenida</h2>
-   
-
-
-      <p>
-  <strong>La Última Frontera</strong>  No es una librería. No es una biblioteca convencional. Es un archivo personal y un espacio de resistencia cultural.  
-  Aquí se cruzan décadas de lectura, estudio y vida.  
-        Es un refugio para libros que importan,
-      aunque ya nadie los busque. Cada libro aquí ha sido elegido con intención. Algunos están a la venta. Otros no.
-      Este proyecto es personal y radicalmente íntimo. Bienvenide a la frontera.
-</p>
-<p>
-  
-  Esta es una tentativa de vivir de los libros sin intermediarios, en soledad elegida pero conectada con quienes aún buscan sentido en las palabras impresas.
-</p>
-    
-  
-
-  <!-- Formulario para agregar un libro con título, autor y precio -->
-  <section id="agregar">
-  <h2>Agregar libro</h2>
-  <input type="text" id="inputTitulo" placeholder="Título del libro">
-  <input type="text" id="inputAutor" placeholder="Autor del libro">
-  <input type="number" id="inputPrecio" placeholder="Precio del libro" min="0">
-  <button id="botonAgregarLibro">Agregar</button>
-
-  <h2>Libros Agregados:</h2>
-  <ul id="listaLibros">
-    <!-- Los libros se mostrarán aquí -->
-  </ul>
-
-  <!-- Script de Firebase y lógica para agregar libros -->
-  <script type="module">
-    // Importar Firebase y la base de datos
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
-
-    // Configuración de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
-      authDomain: "la-ultima-frontera.firebaseapp.com",
-      databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "la-ultima-frontera",
-      storageBucket: "la-ultima-frontera.firebasestorage.app",
-      messagingSenderId: "802228739297",
-      appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
-    };
-
-    // Inicializar Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    // Función para agregar un libro
-    function agregarLibro(titulo, autor, precio) {
-      const librosRef = ref(database, 'libros');
-      const nuevoLibroRef = push(librosRef);
-      set(nuevoLibroRef, {
-        titulo: titulo,
-        autor: autor,
-        precio: precio
-      }).then(() => {
-        alert("Libro agregado con éxito");
-
-        // Limpiar los campos
-        document.getElementById('inputTitulo').value = '';
-        document.getElementById('inputAutor').value = '';
-        document.getElementById('inputPrecio').value = '';
-      }).catch((error) => {
-        console.error("Error al agregar el libro:", error);
-      });
-    }
-    
-
-    // Agregar libro con el botón
-    document.getElementById('botonAgregarLibro').addEventListener('click', () => {
-      const titulo = document.getElementById('inputTitulo').value;
-      const autor = document.getElementById('inputAutor').value;
-      const precio = document.getElementById('inputPrecio').value;
-      if (!titulo || !autor || !precio || isNaN(precio) || parseFloat(precio) <= 0) {
-        alert('Por favor, ingrese título, autor y precio válidos.');
-        return;
-      }
-      agregarLibro(titulo, autor, precio);
-    });
-
-    // Agregar libro presionando Enter
-    document.getElementById('inputTitulo').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        const titulo = document.getElementById('inputTitulo').value;
-        const autor = document.getElementById('inputAutor').value;
-        const precio = document.getElementById('inputPrecio').value;
-        if (!titulo || !autor || !precio || isNaN(precio) || parseFloat(precio) <= 0) {
-          alert('Por favor, ingrese título, autor y precio válidos.');
-          return;
-        }
-        agregarLibro(titulo, autor, precio);
-      }
-    });
-
-    document.getElementById('inputAutor').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        const titulo = document.getElementById('inputTitulo').value;
-        const autor = document.getElementById('inputAutor').value;
-        const precio = document.getElementById('inputPrecio').value;
-        if (!titulo || !autor || !precio || isNaN(precio) || parseFloat(precio) <= 0) {
-          alert('Por favor, ingrese título, autor y precio válidos.');
-          return;
-        }
-        agregarLibro(titulo, autor, precio);
-      }
-    });
-
-    // Mostrar los libros en tiempo real
-    const librosRef = ref(database, 'libros');
-
-    // Escuchar los cambios en la base de datos (en tiempo real)
-    onValue(librosRef, (snapshot) => {
-      const libros = snapshot.val();
-      const listaLibros = document.getElementById('listaLibros');
-      listaLibros.innerHTML = '';  // Limpiar la lista antes de llenarla
-
-      // Si no hay libros, mostramos un mensaje
-      if (!libros) {
-        listaLibros.innerHTML = "<li>No hay libros agregados aún.</li>";
-        return;
-      }
-
-      // Iterar sobre los libros y agregarlos a la lista
-      for (let id in libros) {
-        const libro = libros[id];
-        const li = document.createElement('li');
-        
-        // Crear un enlace a Google Books con el título
-        const enlaceGoogleBooks = `https://books.google.com/?q=${encodeURIComponent(libro.titulo)}`;
-        li.innerHTML = `<strong>${libro.titulo}</strong> de ${libro.autor} - Precio: ${libro.precio}€ - <a href="${enlaceGoogleBooks}" target="_blank">Ver en Google Books</a>`;
-        
-        // Añadir el libro a la lista
-        listaLibros.appendChild(li);
-      }
     });
   </script>
-
-
-  
-  <section id="archivo">
-    <h2>Archivo</h2>
-    <div class="book-list">
-      <div class="book-item">
-  <h3>Leviatán</h3>
-  <p><strong>Autor:</strong> Thomas Hobbes</p>
-  <p>
-    Edición en castellano del clásico del pensamiento político. Una obra fundacional sobre el poder, el contrato social y la naturaleza humana.
-    Este ejemplar pertenece a la colección Biblioteca de Pensamiento Moderno (Ed. Fondo de Cultura Económica).
-  </p>
-  <p><strong>Estado:</strong> Muy bueno</p>
-  <p><strong>Disponible para venta:</strong> No (solo archivo)</p>
-</div>
-      <!-- Más libros -->
-    </div>
-  </section>
-
-  <section id="venta">
-    <h2>Libros a la venta</h2>
-    <div class="book-list">
-      <div class="book-item">
-        <h3>Título del Pack</h3>
-        <p>Descripción breve del pack o lote. Precio aproximado.</p>
-      </div>
-      <!-- Más packs o libros sueltos -->
-    </div>
-  </section>
- 
-  <section id="blog">
-    <h2>Notas</h2>
-    <p>Próximamente: reflexiones, miniensayos y recomendaciones desde el archivo.</p>
-  </section>
-
-  <section id="contacto">
-    <h2>Contacto</h2>
-    <p>¿Quieres saber más o comprar algún libro? Escríbeme a <a href="mailto:ensierrar@gmail.com">contacto@laultimafrontera.com</a>.</p>
-  </section>
-  
-  <footer>
-    <p>&copy; 2025 La Última Frontera. Proyecto independiente basado en una colección privada.</p>
-  </footer>
 </body>
 </html>
-

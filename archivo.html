@@ -1,173 +1,60 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Archivo – La Última Frontera</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arxiu · La Última Frontera</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
- <style>
-    body {
-      margin: 0;
-      font-family: 'IM Fell DW Pica', serif;
-      background-color: #121212;
-      color: #f5f5f5;
-    }
-    header {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 2px solid #444;
-    }
-    header h1 {
-      margin: 0;
-      color: #d4af37;
-    }
-    nav a {
-      margin: 0 1rem;
-      color: #f5f5f5;
-      text-decoration: none;
-    }
-    nav a:hover {
-      color: #d4af37;
-    }
-    main {
-      padding: 2rem;
-    }
-    #buscador {
-      padding: 0.5rem;
-      width: 100%;
-      max-width: 400px;
-      margin-bottom: 2rem;
-    }
-    .book-item {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 10px;
-      border: 1px solid #d4af37;
-      transition: background-color 0.3s;
-    }
-    .book-item:hover {
-      background-color: #2a2a2a;
-    }
-    .book-item h3 {
-      color: #d4af37;
-      margin-top: 0;
-    }
-    .book-item p {
-      margin: 0.5rem 0;
-    }
-  </style>
 </head>
 <body>
-  <div id="header-placeholder"></div>
+  <div class="page">
+    <div id="header-placeholder"></div>
+    <section class="hero"><h1>Arxiu de llibres</h1><p>Cerca, filtra i explora el fons complet de la col·lecció.</p></section>
 
-<script>
-  fetch("header.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("header-placeholder").innerHTML = data;
-      const path = window.location.pathname.split("/").pop();
-      document.querySelectorAll("nav a").forEach(link => {
-        if (link.getAttribute("href") === path) {
-          link.classList.add("active");
-        }
-      });
-    });
-</script>
-
-  <main class="archivo">
-    <section class="busqueda">
-      <input type="text" id="buscador" placeholder="Buscar por título o autor..." aria-label="Buscar libros"/>
+    <section>
+      <div class="controls">
+        <input id="search" placeholder="Cerca per títol, autor o descripció" />
+        <select id="statusFilter">
+          <option value="all">Tots els estats</option>
+          <option value="Muy bueno">Molt bo</option>
+          <option value="Bueno">Bo</option>
+        </select>
+      </div>
+      <div id="books" class="grid"></div>
     </section>
+  </div>
 
-    <section id="archivo-libros" class="book-list"></section>
-  </main>
+  <script src="app.js"></script>
+  <script>
+    app.loadHeader();
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+    const search = document.getElementById('search');
+    const statusFilter = document.getElementById('statusFilter');
+    const booksEl = document.getElementById('books');
+    let allBooks = [];
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
-      authDomain: "la-ultima-frontera.firebaseapp.com",
-      databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "la-ultima-frontera",
-      storageBucket: "la-ultima-frontera.firebasestorage.app",
-      messagingSenderId: "802228739297",
-      appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
-    };
+    function draw() {
+      const q = search.value.toLowerCase();
+      const status = statusFilter.value;
+      const filtered = allBooks.filter((b) => {
+        const matchesText = `${b.titulo} ${b.autor} ${b.descripcion}`.toLowerCase().includes(q);
+        const matchesStatus = status === 'all' || b.estado === status;
+        return matchesText && matchesStatus;
+      });
 
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    function renderizarLibros(libros) {
-      const contenedor = document.getElementById('archivo-libros');
-      contenedor.innerHTML = '';
-
-      libros.forEach(libro => {
-        const div = document.createElement('div');
-        div.className = 'book-item';
-
-        const precioTexto = libro.precio ? `Precio: ${libro.precio}€` : "Precio no disponible";
-        const ventaTexto = libro.venta ? "Sí" : "No (solo archivo)";
-        const enlaceGoogle = `https://www.google.com/search?tbm=bks&q=${encodeURIComponent(libro.titulo + " " + libro.autor)}`;
-
-        div.innerHTML = `
-          <h3>${libro.titulo}</h3>
-          <p><strong>Autor:</strong> ${libro.autor}</p>
-          <p>${libro.descripcion}</p>
-          <p><strong>Estado:</strong> ${libro.estado}</p>
-          <p><strong>Disponible para venta:</strong> ${ventaTexto}</p>
-          <p><strong>${precioTexto}</strong></p>
-          <p><a href="${enlaceGoogle}" target="_blank">Ver en Google Books</a></p>
-        `;
-
-        contenedor.appendChild(div);
+      booksEl.innerHTML = filtered.length ? '' : '<p class="notice">No s’han trobat llibres amb aquests filtres.</p>';
+      filtered.forEach((b) => {
+        const card = document.createElement('article');
+        card.className = 'card book-item';
+        card.innerHTML = `<h3>${b.titulo}</h3><p><strong>${b.autor}</strong></p><p>${b.descripcion}</p><p><strong>Estat:</strong> ${b.estado}</p>`;
+        booksEl.appendChild(card);
       });
     }
 
-    const librosRef = ref(database, 'libros');
-    onValue(librosRef, (snapshot) => {
-      const libros = snapshot.val();
-      const librosArray = [];
-
-      if (libros) {
-        for (let id in libros) {
-          librosArray.push(libros[id]);
-        }
-      }
-
-      renderizarLibros(librosArray);
-    });
-
-    function filtrarLibros(busqueda) {
-      const libros = document.querySelectorAll('.book-item');
-      libros.forEach(libro => {
-        const titulo = libro.querySelector('h3').textContent.toLowerCase();
-        const autor = libro.querySelector('p').textContent.toLowerCase();
-
-        if (titulo.includes(busqueda.toLowerCase()) || autor.includes(busqueda.toLowerCase())) {
-          libro.style.display = '';
-        } else {
-          libro.style.display = 'none';
-        }
-      });
-    }
-
-    document.getElementById('buscador').addEventListener('input', function () {
-      const busqueda = this.value;
-      const libros = document.querySelectorAll('.book-item');
-
-      if (busqueda.trim() === '') {
-        libros.forEach(libro => libro.style.display = '');
-      } else {
-        filtrarLibros(busqueda);
-      }
-    });
+    app.getBooks().then((books) => { allBooks = books; draw(); });
+    search.addEventListener('input', draw);
+    statusFilter.addEventListener('change', draw);
   </script>
 </body>
 </html>
-
