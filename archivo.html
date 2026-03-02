@@ -62,7 +62,21 @@
       filtered.forEach((b) => {
         const card = document.createElement('article');
         card.className = 'card book-item';
-        card.innerHTML = `<h3>${b.titulo}</h3><p><strong>${b.autor}</strong></p><p>${b.descripcion}</p><p><strong>Estat:</strong> ${b.estado}</p>`;
+        card.innerHTML = `
+          <h3>${b.titulo}</h3>
+          <p><strong>${b.autor}</strong></p>
+          <p>${b.descripcion}</p>
+          <p><strong>Estat:</strong> ${b.estado}</p>
+          ${b.venta ? `<p><strong>Preu:</strong> ${Number(b.precio || 0).toFixed(2)} €</p><button class="add-to-cart-btn">Afegir a la llista de compra</button>` : ''}
+        `;
+
+        if (b.venta) {
+          card.querySelector('.add-to-cart-btn').addEventListener('click', () => {
+            const ok = app.addToCart({ titulo: b.titulo, autor: b.autor, precio: Number(b.precio || 0) });
+            alert(ok ? 'Llibre afegit a la cistella.' : 'Aquest llibre ja és a la cistella.');
+          });
+        }
+
         booksEl.appendChild(card);
       });
     }
