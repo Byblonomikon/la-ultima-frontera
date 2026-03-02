@@ -89,6 +89,12 @@
       isbnMessage.textContent = text;
     }
 
+    function setSearchingState(isSearching) {
+      isbnSearchBtn.disabled = isSearching;
+      isbnSearchBtn.textContent = isSearching ? 'Buscant...' : 'Buscar a Google Books';
+      isbnInput.disabled = isSearching;
+    }
+
     function drawPreview(book) {
       const card = document.createElement('article');
       card.className = 'card book-item';
@@ -124,16 +130,33 @@
         return;
       }
 
-      setMessage('Buscant llibre a Google Books...');
-      const book = await app.fetchGoogleBookByIsbn(code);
+      setSearchingState(true);
+      setMessage('Buscant llibre a Google Books... (pot trigar uns segons)');
+      const result = await app.fetchGoogleBookByIsbn(code, { timeoutMs: 12000 });
+      setSearchingState(false);
 
-      if (!book) {
-        setMessage('No s\'ha trobat cap llibre amb aquest codi.');
+      if (result.status === 'ok') {
+        setMessage('Resultat trobat. Revisa la fitxa i afegeix-lo si vols.');
+        drawPreview(result.book);
         return;
       }
 
-      setMessage('Resultat trobat. Revisa la fitxa i afegeix-lo si vols.');
-      drawPreview(book);
+      if (result.status === 'invalid_code') {
+        setMessage('El codi introduït no sembla un ISBN vàlid.');
+        return;
+      }
+
+      if (result.status === 'not_found') {
+        setMessage('No s\'ha trobat cap llibre amb aquest ISBN a Google Books.');
+        return;
+      }
+
+      if (result.status === 'timeout') {
+        setMessage('La cerca ha trigat massa (12s). Torna-ho a provar en uns moments.');
+        return;
+      }
+
+      setMessage('Hi ha hagut un problema de connexió amb Google Books. Torna-ho a provar.');
     });
   </script>
 </body>
