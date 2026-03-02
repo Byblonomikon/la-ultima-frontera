@@ -174,34 +174,38 @@
         <p><strong>Autor:</strong> ${book.autor}</p>
         <p>${book.descripcion}</p>
         <p><strong>ISBN:</strong> ${book.isbn}</p>
-        <button id="saveBookBtn" type="button">Afegir aquest llibre a l'arxiu</button>
-        <label for="bookCondition">Estat del llibre</label>
-        <select id="bookCondition">
+        <p class="notice">Configura també aquí l'estat i el preu (mateixos valors que a dalt).</p>
+        <label for="previewBookCondition">Estat del llibre</label>
+        <select id="previewBookCondition">
           <option value="malmès">Malmès</option>
-          <option value="usat" selected>Usat</option>
+          <option value="usat">Usat</option>
           <option value="en bon estat">En bon estat</option>
           <option value="com nou">Com nou</option>
         </select>
-        <label for="bookPrice">Preu (€)</label>
-        <input id="bookPrice" type="number" min="0" step="0.01" value="0" />
-        <label for="bookForSale">Mostrar a Botiga</label>
-        <select id="bookForSale">
-          <option value="true" selected>Sí</option>
-          <option value="false">No</option>
-        </select>
+        <label for="previewBookPrice">Preu (€)</label>
+        <input id="previewBookPrice" type="number" min="0" step="0.01" value="0" />
         <button id="saveBookBtn" type="button">Afegir aquest llibre a l'arxiu</button>
-        <button id="saveBookBtn">Afegir aquest llibre a l'arxiu</button>
       `;
       googlePreview.innerHTML = '';
       googlePreview.appendChild(card);
 
+      const previewBookCondition = card.querySelector('#previewBookCondition');
+      const previewBookPrice = card.querySelector('#previewBookPrice');
+      previewBookCondition.value = newBookCondition.value;
+      previewBookPrice.value = newBookPrice.value;
+
+      previewBookCondition.addEventListener('change', () => {
+        newBookCondition.value = previewBookCondition.value;
+      });
+
+      previewBookPrice.addEventListener('input', () => {
+        newBookPrice.value = previewBookPrice.value;
+      });
+
       card.querySelector('#saveBookBtn').addEventListener('click', () => {
-        const condition = newBookCondition.value;
-        const price = Number(newBookPrice.value || 0);
+        const condition = previewBookCondition.value;
+        const price = Number(previewBookPrice.value || 0);
         const forSale = newBookForSale.value === 'true';
-        const condition = card.querySelector('#bookCondition').value;
-        const price = Number(card.querySelector('#bookPrice').value || 0);
-        const forSale = card.querySelector('#bookForSale').value === 'true';
         if (Number.isNaN(price) || price < 0) {
           setMessage('Introdueix un preu vàlid (0 o superior).');
           return;

@@ -293,19 +293,18 @@ async function fetchGoogleBookByIsbn(code, options = {}) {
     author = 'Autoria disponible a Open Library';
   }
 
-  return {
-    status: 'ok',
-    book: {
-      titulo: olData.title || 'Sense títol',
-      autor: author,
-      descripcion: (olData.subtitle || 'Resultat obtingut d’Open Library.'),
-      estado: 'Muy bueno',
-      venta: false,
-      precio: 0,
-      isbn: cleanCode
+ return {
+  status: 'ok',
+  book: {
+    titulo: olData.title || 'Sense títol',
+    autor: author,
+    descripcion: (olData.subtitle || 'Resultat obtingut d’Open Library.'),
+    estado: 'Muy bueno',
+    venta: false,
+    precio: 0,
     isbn: cleanCode
-    }
-  };
+  }
+};
 }
 
 async function fetchGoogleBookByIsbn(code, options = {}) {
@@ -376,14 +375,19 @@ async function fetchGoogleBookByIsbn(code, options = {}) {
     }
   }
 
-  if (googleStatus === 'network_error' || openLibrary.status === 'network_error') return { status: 'network_error', book: null };
-  if (googleStatus === 'timeout' || openLibrary.status === 'timeout') return { status: 'timeout', book: null };
-  if (googleStatus === 'api_error' && openLibrary.status === 'api_error') return { status: 'api_error', book: null };
-  if (google.status === 'network_error' || openLibrary.status === 'network_error') return { status: 'network_error', book: null };
-  if (google.status === 'timeout' || openLibrary.status === 'timeout') return { status: 'timeout', book: null };
-  if (google.status === 'api_error' && openLibrary.status === 'api_error') return { status: 'api_error', book: null };
+ if (googleStatus === 'network_error' || openLibrary.status === 'network_error') {
+  return { status: 'network_error', book: null };
+}
 
-  return { status: 'not_found', book: null };
+if (googleStatus === 'timeout' || openLibrary.status === 'timeout') {
+  return { status: 'timeout', book: null };
+}
+
+if (googleStatus === 'api_error' && openLibrary.status === 'api_error') {
+  return { status: 'api_error', book: null };
+}
+
+return { status: 'not_found', book: null };
 }
 
 window.app = {
