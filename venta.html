@@ -10,7 +10,7 @@
 <body>
   <div class="page">
     <div id="header-placeholder"></div>
-    <section class="hero"><h1>Botiga directa</h1><p>Compra llibres disponibles sense intermediaris. Afageix-los a la cistella en un clic.</p></section>
+    <section class="hero"><h1>Botiga directa</h1><p>Compra llibres disponibles sense intermediaris. Ara es mostren tots directament i pots filtrar-los amb el cercador quan n'hi hagi molts.</p></section>
 
     <section>
       <div class="controls">
@@ -20,6 +20,7 @@
           <option value="author">Ordena per autor</option>
         </select>
       </div>
+      <p id="resultsInfo" class="notice"></p>
       <div id="saleBooks" class="grid"></div>
     </section>
   </div>
@@ -29,17 +30,24 @@
     app.loadHeader();
     const search = document.getElementById('search');
     const sort = document.getElementById('sort');
+    const resultsInfo = document.getElementById('resultsInfo');
     const saleBooks = document.getElementById('saleBooks');
-    let books = [];
+    let availableBooks = [];
 
     function render() {
       const q = search.value.toLowerCase();
-      const sorted = [...books]
-        .filter((b) => b.venta)
+      const sorted = [...availableBooks]
         .filter((b) => `${b.titulo} ${b.autor}`.toLowerCase().includes(q))
-        .sort((a, b) => a[sort.value].localeCompare(b[sort.value]));
+        .sort((a, b) => {
+          if (sort.value === 'author') return a.autor.localeCompare(b.autor);
+          return a.titulo.localeCompare(b.titulo);
+        });
 
-      saleBooks.innerHTML = sorted.length ? '' : '<p class="notice">No hi ha llibres en venda amb aquests filtres.</p>';
+      resultsInfo.textContent = sorted.length
+        ? `${sorted.length} llibre(s) disponible(s)`
+        : 'No hi ha llibres en venda amb aquests filtres.';
+
+      saleBooks.innerHTML = '';
 
       sorted.forEach((b) => {
         const card = document.createElement('article');
@@ -59,8 +67,21 @@
     }
 
     app.getBooks().then((data) => {
-      books = data.map((b) => ({ ...b, precio: b.precio || (b.venta ? 15 : 0) }));
+      availableBooks = data
+        .filter((b) => b.venta)
+        .map((b) => ({ ...b, precio: b.precio || 15 }));
       render();
+    });
+
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'llibresCustom') {
+        app.getBooks().then((data) => {
+          availableBooks = data
+            .filter((b) => b.venta)
+            .map((b) => ({ ...b, precio: b.precio || 15 }));
+          render();
+        });
+      }
     });
 
     search.addEventListener('input', render);
