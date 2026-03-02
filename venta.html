@@ -73,6 +73,17 @@
       render();
     });
 
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'llibresCustom') {
+        app.getBooks().then((data) => {
+          availableBooks = data
+            .filter((b) => b.venta)
+            .map((b) => ({ ...b, precio: b.precio || 15 }));
+          render();
+        });
+      }
+    });
+
     search.addEventListener('input', render);
     sort.addEventListener('change', render);
   </script>

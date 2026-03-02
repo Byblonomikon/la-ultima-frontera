@@ -33,7 +33,11 @@
       <p>Introdueix l'ISBN (o codi de barres) i recuperarem la informació des de Google Books.</p>
       <div class="add-book-controls">
         <input id="isbnInput" placeholder="Ex: 9780141036144" />
-        <button id="isbnSearchBtn">Buscar a Google Books</button>
+        <button id="isbnSearchBtn" type="button">Buscar a Google Books</button>
+      </div>
+      <div class="add-book-controls" style="margin-top:.6rem;">
+        <button id="copySyncLinkBtn" type="button">Copiar enllaç de sincronització</button>
+        <p class="notice" style="margin:0;align-self:center;">Els llibres afegits es guarden al navegador actual. Usa aquest enllaç per passar-los al mòbil.</p>
       </div>
       <div class="add-book-controls" style="margin-top:.6rem;">
         <button id="copySyncLinkBtn" type="button">Copiar enllaç de sincronització</button>
@@ -94,6 +98,12 @@
     search.addEventListener('input', draw);
     statusFilter.addEventListener('change', draw);
 
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'llibresCustom') {
+        app.getBooks().then((books) => { allBooks = books; draw(); });
+      }
+    });
+
     function setMessage(text) {
       isbnMessage.textContent = text;
     }
@@ -148,6 +158,12 @@
         </select>
         <label for="bookPrice">Preu (€)</label>
         <input id="bookPrice" type="number" min="0" step="0.01" value="0" />
+        <label for="bookForSale">Mostrar a Botiga</label>
+        <select id="bookForSale">
+          <option value="true" selected>Sí</option>
+          <option value="false">No</option>
+        </select>
+        <button id="saveBookBtn" type="button">Afegir aquest llibre a l'arxiu</button>
         <button id="saveBookBtn">Afegir aquest llibre a l'arxiu</button>
       `;
       googlePreview.innerHTML = '';
@@ -156,6 +172,7 @@
       card.querySelector('#saveBookBtn').addEventListener('click', () => {
         const condition = card.querySelector('#bookCondition').value;
         const price = Number(card.querySelector('#bookPrice').value || 0);
+        const forSale = card.querySelector('#bookForSale').value === 'true';
         if (Number.isNaN(price) || price < 0) {
           setMessage('Introdueix un preu vàlid (0 o superior).');
           return;
@@ -164,6 +181,7 @@
         const enrichedBook = {
           ...book,
           estado: condition,
+          venta: forSale,
           precio: Number(price.toFixed(2))
         };
 
@@ -179,7 +197,8 @@
       });
     }
 
-    isbnSearchBtn.addEventListener('click', async () => {
+    isbnSearchBtn.addEventListener('click', async (event) => {
+      event.preventDefault();
       const code = isbnInput.value.trim();
       googlePreview.innerHTML = '';
 
