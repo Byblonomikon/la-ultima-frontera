@@ -1,5 +1,44 @@
 const HEADER_PATH = 'header.html';
 
+const FALLBACK_BOOKS = [
+  {
+    titulo: 'Leviatán',
+    autor: 'Thomas Hobbes',
+    descripcion: 'Edició en castellà del clàssic del pensament polític sobre poder, contracte social i naturalesa humana.',
+    estado: 'Muy bueno',
+    venta: false,
+    precio: 0,
+    isbn: ''
+  },
+  {
+    titulo: '1984',
+    autor: 'George Orwell',
+    descripcion: 'Distopia essencial sobre vigilància, repressió i llibertat individual.',
+    estado: 'Bueno',
+    venta: true,
+    precio: 12,
+    isbn: ''
+  },
+  {
+    titulo: 'El nom de la rosa',
+    autor: 'Umberto Eco',
+    descripcion: 'Novel·la històrica i detectivesca que barreja teologia, poder i biblioteques medievals.',
+    estado: 'Muy bueno',
+    venta: true,
+    precio: 18,
+    isbn: ''
+  },
+  {
+    titulo: "Pedagogia de l'oprimit",
+    autor: 'Paulo Freire',
+    descripcion: 'Text clau per repensar educació, emancipació i consciència crítica.',
+    estado: 'Bueno',
+    venta: true,
+    precio: 14,
+    isbn: ''
+  }
+];
+
 async function loadHeader() {
   const placeholder = document.getElementById('header-placeholder');
   if (!placeholder) return;
@@ -67,6 +106,7 @@ async function getBooks() {
     baseBooks = await res.json();
   } catch (error) {
     console.error(error);
+    baseBooks = FALLBACK_BOOKS;
   }
 
   const customBooks = getCustomBooks();
