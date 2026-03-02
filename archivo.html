@@ -35,6 +35,24 @@
         <input id="isbnInput" placeholder="Ex: 9780141036144" />
         <button id="isbnSearchBtn" type="button">Buscar a Google Books</button>
       </div>
+      <div class="add-book-meta">
+        <label>Estat del llibre
+          <select id="newBookCondition">
+            <option value="malmès">Malmès</option>
+            <option value="usat" selected>Usat</option>
+            <option value="en bon estat">En bon estat</option>
+            <option value="com nou">Com nou</option>
+          </select>
+        </label>
+        <label>Preu (€)
+          <input id="newBookPrice" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label>Mostrar a Botiga
+          <select id="newBookForSale">
+            <option value="true" selected>Sí</option>
+            <option value="false">No</option>
+          </select>
+        </label>
       <div class="add-book-controls" style="margin-top:.6rem;">
         <button id="copySyncLinkBtn" type="button">Copiar enllaç de sincronització</button>
         <p class="notice" style="margin:0;align-self:center;">Els llibres afegits es guarden al navegador actual. Usa aquest enllaç per passar-los al mòbil.</p>
@@ -60,6 +78,9 @@
     const copySyncLinkBtn = document.getElementById('copySyncLinkBtn');
     const isbnMessage = document.getElementById('isbnMessage');
     const googlePreview = document.getElementById('googlePreview');
+    const newBookCondition = document.getElementById('newBookCondition');
+    const newBookPrice = document.getElementById('newBookPrice');
+    const newBookForSale = document.getElementById('newBookForSale');
     let allBooks = [];
 
     function draw() {
@@ -149,6 +170,7 @@
         <p><strong>Autor:</strong> ${book.autor}</p>
         <p>${book.descripcion}</p>
         <p><strong>ISBN:</strong> ${book.isbn}</p>
+        <button id="saveBookBtn" type="button">Afegir aquest llibre a l'arxiu</button>
         <label for="bookCondition">Estat del llibre</label>
         <select id="bookCondition">
           <option value="malmès">Malmès</option>
@@ -170,6 +192,9 @@
       googlePreview.appendChild(card);
 
       card.querySelector('#saveBookBtn').addEventListener('click', () => {
+        const condition = newBookCondition.value;
+        const price = Number(newBookPrice.value || 0);
+        const forSale = newBookForSale.value === 'true';
         const condition = card.querySelector('#bookCondition').value;
         const price = Number(card.querySelector('#bookPrice').value || 0);
         const forSale = card.querySelector('#bookForSale').value === 'true';
