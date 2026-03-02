@@ -124,6 +124,55 @@ function getCustomBooks() {
   return JSON.parse(localStorage.getItem('llibresCustom') || '[]');
 }
 
+function mergeCustomBooks(incomingBooks) {
+  const current = getCustomBooks();
+  const merged = [...current];
+  let added = 0;
+
+  incomingBooks.forEach((book) => {
+    const exists = merged.some((item) => {
+      if (item.isbn && book.isbn) return item.isbn === book.isbn;
+      return item.titulo === book.titulo && item.autor === book.autor;
+    });
+
+    if (!exists) {
+      merged.push(book);
+      added += 1;
+    }
+  });
+
+  localStorage.setItem('llibresCustom', JSON.stringify(merged));
+  return added;
+}
+
+function exportCustomBooksToken() {
+  const raw = JSON.stringify(getCustomBooks());
+  return btoa(unescape(encodeURIComponent(raw)));
+}
+
+function importCustomBooksToken(token) {
+  try {
+    const raw = decodeURIComponent(escape(atob(token)));
+    const books = JSON.parse(raw);
+    if (!Array.isArray(books)) return { ok: false, added: 0 };
+
+    const normalized = books.map((book) => ({
+      titulo: book.titulo || 'Sense títol',
+      autor: book.autor || 'Autor desconegut',
+      descripcion: book.descripcion || 'Sense descripció',
+      estado: book.estado || 'Bueno',
+      venta: Boolean(book.venta),
+      precio: Number(book.precio || 0),
+      isbn: book.isbn || ''
+    }));
+
+    return { ok: true, added: mergeCustomBooks(normalized) };
+  } catch (error) {
+    console.error(error);
+    return { ok: false, added: 0 };
+  }
+}
+
 function saveCustomBook(book) {
   const customBooks = getCustomBooks();
   const alreadyExists = customBooks.some((item) => item.isbn && item.isbn === book.isbn);
@@ -194,6 +243,9 @@ window.app = {
   addToCart,
   updateCartBadge,
   getCustomBooks,
+  mergeCustomBooks,
+  exportCustomBooksToken,
+  importCustomBooksToken,
   saveCustomBook,
   fetchGoogleBookByIsbn
 };

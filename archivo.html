@@ -31,6 +31,10 @@
         <input id="isbnInput" placeholder="Ex: 9780141036144" />
         <button id="isbnSearchBtn">Buscar a Google Books</button>
       </div>
+      <div class="add-book-controls" style="margin-top:.6rem;">
+        <button id="copySyncLinkBtn" type="button">Copiar enllaç de sincronització</button>
+        <p class="notice" style="margin:0;align-self:center;">Els llibres afegits es guarden al navegador actual. Usa aquest enllaç per passar-los al mòbil.</p>
+      </div>
       <p id="isbnMessage" class="notice"></p>
       <div id="googlePreview"></div>
     </section>
@@ -45,6 +49,7 @@
     const booksEl = document.getElementById('books');
     const isbnInput = document.getElementById('isbnInput');
     const isbnSearchBtn = document.getElementById('isbnSearchBtn');
+    const copySyncLinkBtn = document.getElementById('copySyncLinkBtn');
     const isbnMessage = document.getElementById('isbnMessage');
     const googlePreview = document.getElementById('googlePreview');
     let allBooks = [];
@@ -95,6 +100,33 @@
       isbnInput.disabled = isSearching;
     }
 
+    async function copySyncLink() {
+      const token = app.exportCustomBooksToken();
+      const url = new URL(window.location.href);
+      url.searchParams.set('llibres', token);
+
+      try {
+        await navigator.clipboard.writeText(url.toString());
+        setMessage('Enllaç copiat. Obre\'l al mòbil per importar els llibres afegits.');
+      } catch (error) {
+        console.error(error);
+        setMessage(`No s'ha pogut copiar automàticament. Copia aquest enllaç manualment: ${url.toString()}`);
+      }
+    }
+
+    copySyncLinkBtn.addEventListener('click', copySyncLink);
+
+    const tokenFromUrl = new URLSearchParams(window.location.search).get('llibres');
+    if (tokenFromUrl) {
+      const imported = app.importCustomBooksToken(tokenFromUrl);
+      if (imported.ok) {
+        setMessage(`S'han importat ${imported.added} llibre(s) des de l'enllaç de sincronització.`);
+        app.getBooks().then((books) => { allBooks = books; draw(); });
+      } else {
+        setMessage('No s\'ha pogut importar l\'enllaç de sincronització.');
+      }
+    }
+
     function drawPreview(book) {
       const card = document.createElement('article');
       card.className = 'card book-item';
@@ -117,7 +149,7 @@
 
         allBooks.unshift(book);
         draw();
-        setMessage('Llibre afegit correctament a l\'arxiu local.');
+        setMessage('Llibre afegit correctament a aquest dispositiu. Si el vols al mòbil, copia l\'enllaç de sincronització.');
       });
     }
 
