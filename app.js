@@ -4,8 +4,15 @@ async function loadHeader() {
   const placeholder = document.getElementById('header-placeholder');
   if (!placeholder) return;
 
-  const res = await fetch(HEADER_PATH);
-  placeholder.innerHTML = await res.text();
+  try {
+    const res = await fetch(HEADER_PATH);
+    if (!res.ok) throw new Error('No s\'ha pogut carregar el header');
+    placeholder.innerHTML = await res.text();
+  } catch (error) {
+    console.error(error);
+    placeholder.innerHTML = '';
+    return;
+  }
 
   const path = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.site-nav a').forEach((link) => {
@@ -16,14 +23,16 @@ async function loadHeader() {
   const root = document.documentElement;
   const savedTheme = localStorage.getItem('theme') || 'dark';
   root.dataset.theme = savedTheme;
-  toggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+  if (toggle) toggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
 
-  toggle.addEventListener('click', () => {
-    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    root.dataset.theme = next;
-    localStorage.setItem('theme', next);
-    toggle.textContent = next === 'dark' ? '🌙' : '☀️';
-  });
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      toggle.textContent = next === 'dark' ? '🌙' : '☀️';
+    });
+  }
 
   updateCartBadge();
 }
@@ -51,10 +60,25 @@ function addToCart(book) {
 }
 
 async function getBooks() {
-  const res = await fetch('data/libros.json');
-  const baseBooks = await res.json();
+  let baseBooks = [];
+  try {
+    const res = await fetch('data/libros.json');
+    if (!res.ok) throw new Error('No s\'ha pogut carregar el catàleg base');
+    baseBooks = await res.json();
+  } catch (error) {
+    console.error(error);
+  }
+
   const customBooks = getCustomBooks();
-  return [...customBooks, ...baseBooks];
+  return [...customBooks, ...baseBooks].map((book) => ({
+    titulo: book.titulo || 'Sense títol',
+    autor: book.autor || 'Autor desconegut',
+    descripcion: book.descripcion || 'Sense descripció',
+    estado: book.estado || 'Bueno',
+    venta: Boolean(book.venta),
+    precio: Number(book.precio || 0),
+    isbn: book.isbn || ''
+  }));
 }
 
 function getCustomBooks() {
