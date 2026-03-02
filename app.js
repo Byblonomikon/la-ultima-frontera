@@ -330,6 +330,27 @@ async function fetchGoogleBookByIsbn(code, options = {}) {
     }
   }
 
+  const googleQueries = [
+    `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(cleanCode)}&maxResults=1`,
+    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(cleanCode)}&maxResults=1`
+  ];
+
+  let googleStatus = 'not_found';
+  for (const queryUrl of googleQueries) {
+    const google = await fetchJsonWithTimeout(queryUrl);
+    googleStatus = google.status;
+    if (google.status === 'ok') {
+      const item = google.data.items && google.data.items.length ? google.data.items[0] : null;
+      if (item) {
+        return { status: 'ok', book: normalizeFetchedBook(item.volumeInfo || {}, cleanCode) };
+      }
+      googleStatus = 'not_found';
+      continue;
+    }
+
+    if (google.status === 'timeout') {
+      return { status: 'timeout', book: null };
+    }
   const google = await fetchJsonWithTimeout(
     `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(cleanCode)}`
   );
@@ -355,6 +376,9 @@ async function fetchGoogleBookByIsbn(code, options = {}) {
     }
   }
 
+  if (googleStatus === 'network_error' || openLibrary.status === 'network_error') return { status: 'network_error', book: null };
+  if (googleStatus === 'timeout' || openLibrary.status === 'timeout') return { status: 'timeout', book: null };
+  if (googleStatus === 'api_error' && openLibrary.status === 'api_error') return { status: 'api_error', book: null };
   if (google.status === 'network_error' || openLibrary.status === 'network_error') return { status: 'network_error', book: null };
   if (google.status === 'timeout' || openLibrary.status === 'timeout') return { status: 'timeout', book: null };
   if (google.status === 'api_error' && openLibrary.status === 'api_error') return { status: 'api_error', book: null };
