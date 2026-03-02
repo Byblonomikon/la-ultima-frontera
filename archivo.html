@@ -23,6 +23,17 @@
       </div>
       <div id="books" class="grid"></div>
     </section>
+
+    <section class="card add-book">
+      <h2>Afegir llibre per codi de barres o ISBN</h2>
+      <p>Introdueix l'ISBN (o codi de barres) i recuperarem la informació des de Google Books.</p>
+      <div class="add-book-controls">
+        <input id="isbnInput" placeholder="Ex: 9780141036144" />
+        <button id="isbnSearchBtn">Buscar a Google Books</button>
+      </div>
+      <p id="isbnMessage" class="notice"></p>
+      <div id="googlePreview"></div>
+    </section>
   </div>
 
   <script src="app.js"></script>
@@ -32,6 +43,10 @@
     const search = document.getElementById('search');
     const statusFilter = document.getElementById('statusFilter');
     const booksEl = document.getElementById('books');
+    const isbnInput = document.getElementById('isbnInput');
+    const isbnSearchBtn = document.getElementById('isbnSearchBtn');
+    const isbnMessage = document.getElementById('isbnMessage');
+    const googlePreview = document.getElementById('googlePreview');
     let allBooks = [];
 
     function draw() {
@@ -55,6 +70,57 @@
     app.getBooks().then((books) => { allBooks = books; draw(); });
     search.addEventListener('input', draw);
     statusFilter.addEventListener('change', draw);
+
+    function setMessage(text) {
+      isbnMessage.textContent = text;
+    }
+
+    function drawPreview(book) {
+      const card = document.createElement('article');
+      card.className = 'card book-item';
+      card.innerHTML = `
+        <h3>${book.titulo}</h3>
+        <p><strong>Autor:</strong> ${book.autor}</p>
+        <p>${book.descripcion}</p>
+        <p><strong>ISBN:</strong> ${book.isbn}</p>
+        <button id="saveBookBtn">Afegir aquest llibre a l'arxiu</button>
+      `;
+      googlePreview.innerHTML = '';
+      googlePreview.appendChild(card);
+
+      card.querySelector('#saveBookBtn').addEventListener('click', () => {
+        const added = app.saveCustomBook(book);
+        if (!added) {
+          setMessage('Aquest ISBN ja s\'ha afegit abans.');
+          return;
+        }
+
+        allBooks.unshift(book);
+        draw();
+        setMessage('Llibre afegit correctament a l\'arxiu local.');
+      });
+    }
+
+    isbnSearchBtn.addEventListener('click', async () => {
+      const code = isbnInput.value.trim();
+      googlePreview.innerHTML = '';
+
+      if (!code) {
+        setMessage('Introdueix un ISBN o codi de barres.');
+        return;
+      }
+
+      setMessage('Buscant llibre a Google Books...');
+      const book = await app.fetchGoogleBookByIsbn(code);
+
+      if (!book) {
+        setMessage('No s\'ha trobat cap llibre amb aquest codi.');
+        return;
+      }
+
+      setMessage('Resultat trobat. Revisa la fitxa i afegeix-lo si vols.');
+      drawPreview(book);
+    });
   </script>
 </body>
 </html>

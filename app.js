@@ -52,7 +52,55 @@ function addToCart(book) {
 
 async function getBooks() {
   const res = await fetch('data/libros.json');
-  return res.json();
+  const baseBooks = await res.json();
+  const customBooks = getCustomBooks();
+  return [...customBooks, ...baseBooks];
 }
 
-window.app = { loadHeader, getBooks, getCart, setCart, addToCart, updateCartBadge };
+function getCustomBooks() {
+  return JSON.parse(localStorage.getItem('llibresCustom') || '[]');
+}
+
+function saveCustomBook(book) {
+  const customBooks = getCustomBooks();
+  const alreadyExists = customBooks.some((item) => item.isbn && item.isbn === book.isbn);
+  if (alreadyExists) return false;
+  customBooks.push(book);
+  localStorage.setItem('llibresCustom', JSON.stringify(customBooks));
+  return true;
+}
+
+async function fetchGoogleBookByIsbn(code) {
+  const cleanCode = code.replace(/[^\dXx]/g, '');
+  if (!cleanCode) return null;
+
+  const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(cleanCode)}`);
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  const item = data.items && data.items.length ? data.items[0] : null;
+  if (!item) return null;
+
+  const info = item.volumeInfo || {};
+  return {
+    titulo: info.title || 'Sense títol',
+    autor: (info.authors && info.authors.length ? info.authors.join(', ') : 'Autor desconegut'),
+    descripcion: info.description || 'Sense descripció disponible',
+    estado: 'Muy bueno',
+    venta: false,
+    precio: 0,
+    isbn: cleanCode
+  };
+}
+
+window.app = {
+  loadHeader,
+  getBooks,
+  getCart,
+  setCart,
+  addToCart,
+  updateCartBadge,
+  getCustomBooks,
+  saveCustomBook,
+  fetchGoogleBookByIsbn
+};
