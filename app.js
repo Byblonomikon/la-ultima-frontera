@@ -50,7 +50,6 @@ async function loadHeader() {
   } catch (error) {
     console.error(error);
     placeholder.innerHTML = '';
-    return;
   }
 
   const path = window.location.pathname.split('/').pop() || 'index.html';
@@ -134,19 +133,48 @@ function saveCustomBook(book) {
   return true;
 }
 
-async function fetchGoogleBookByIsbn(code) {
+async function fetchGoogleBookByIsbn(code, options = {}) {
+  const timeoutMs = Number(options.timeoutMs || 12000);
   const cleanCode = code.replace(/[^\dXx]/g, '');
-  if (!cleanCode) return null;
+  if (!cleanCode) return { status: 'invalid_code', book: null };
 
-  const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(cleanCode)}`);
-  if (!res.ok) return null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  const data = await res.json();
+  let res;
+  try {
+    res = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(cleanCode)}`,
+      { signal: controller.signal }
+    );
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error && error.name === 'AbortError') {
+      return { status: 'timeout', book: null };
+    }
+
+    console.error(error);
+    return { status: 'network_error', book: null };
+  }
+
+  clearTimeout(timeoutId);
+  if (!res.ok) return { status: 'api_error', book: null };
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (error) {
+    console.error(error);
+    return { status: 'invalid_response', book: null };
+  }
+
   const item = data.items && data.items.length ? data.items[0] : null;
-  if (!item) return null;
+  if (!item) return { status: 'not_found', book: null };
 
   const info = item.volumeInfo || {};
   return {
+    status: 'ok',
+    book: {
     titulo: info.title || 'Sense títol',
     autor: (info.authors && info.authors.length ? info.authors.join(', ') : 'Autor desconegut'),
     descripcion: info.description || 'Sense descripció disponible',
@@ -154,6 +182,7 @@ async function fetchGoogleBookByIsbn(code) {
     venta: false,
     precio: 0,
     isbn: cleanCode
+    }
   };
 }
 
