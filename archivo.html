@@ -17,8 +17,12 @@
         <input id="search" placeholder="Cerca per títol, autor o descripció" />
         <select id="statusFilter">
           <option value="all">Tots els estats</option>
-          <option value="Muy bueno">Molt bo</option>
-          <option value="Bueno">Bo</option>
+          <option value="malmès">Malmès</option>
+          <option value="usat">Usat</option>
+          <option value="en bon estat">En bon estat</option>
+          <option value="com nou">Com nou</option>
+          <option value="Bueno">Bo (antic)</option>
+          <option value="Muy bueno">Molt bo (antic)</option>
         </select>
       </div>
       <div id="books" class="grid"></div>
@@ -135,19 +139,41 @@
         <p><strong>Autor:</strong> ${book.autor}</p>
         <p>${book.descripcion}</p>
         <p><strong>ISBN:</strong> ${book.isbn}</p>
+        <label for="bookCondition">Estat del llibre</label>
+        <select id="bookCondition">
+          <option value="malmès">Malmès</option>
+          <option value="usat" selected>Usat</option>
+          <option value="en bon estat">En bon estat</option>
+          <option value="com nou">Com nou</option>
+        </select>
+        <label for="bookPrice">Preu (€)</label>
+        <input id="bookPrice" type="number" min="0" step="0.01" value="0" />
         <button id="saveBookBtn">Afegir aquest llibre a l'arxiu</button>
       `;
       googlePreview.innerHTML = '';
       googlePreview.appendChild(card);
 
       card.querySelector('#saveBookBtn').addEventListener('click', () => {
-        const added = app.saveCustomBook(book);
+        const condition = card.querySelector('#bookCondition').value;
+        const price = Number(card.querySelector('#bookPrice').value || 0);
+        if (Number.isNaN(price) || price < 0) {
+          setMessage('Introdueix un preu vàlid (0 o superior).');
+          return;
+        }
+
+        const enrichedBook = {
+          ...book,
+          estado: condition,
+          precio: Number(price.toFixed(2))
+        };
+
+        const added = app.saveCustomBook(enrichedBook);
         if (!added) {
           setMessage('Aquest ISBN ja s\'ha afegit abans.');
           return;
         }
 
-        allBooks.unshift(book);
+        allBooks.unshift(enrichedBook);
         draw();
         setMessage('Llibre afegit correctament a aquest dispositiu. Si el vols al mòbil, copia l\'enllaç de sincronització.');
       });
