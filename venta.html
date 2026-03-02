@@ -1,167 +1,70 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Libros en Venta – La Última Frontera</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Botiga · La Última Frontera</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'IM Fell DW Pica', serif;
-      background-color: #121212;
-      color: #f5f5f5;
-    }
-    header {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 2px solid #444;
-    }
-    header h1 {
-      margin: 0;
-      color: #d4af37;
-    }
-    nav a {
-      margin: 0 1rem;
-      color: #f5f5f5;
-      text-decoration: none;
-    }
-    nav a:hover {
-      color: #d4af37;
-    }
-    main {
-      padding: 2rem;
-    }
-    #buscador {
-      padding: 0.5rem;
-      width: 100%;
-      max-width: 400px;
-      margin-bottom: 2rem;
-    }
-    .book-item {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 10px;
-      border: 1px solid #d4af37;
-      transition: background-color 0.3s;
-    }
-    .book-item:hover {
-      background-color: #2a2a2a;
-    }
-    .book-item h3 {
-      color: #d4af37;
-      margin-top: 0;
-    }
-    .book-item p {
-      margin: 0.5rem 0;
-    }
-  </style>
 </head>
-<div id="header-placeholder"></div>
+<body>
+  <div class="page">
+    <div id="header-placeholder"></div>
+    <section class="hero"><h1>Botiga directa</h1><p>Compra llibres disponibles sense intermediaris. Afageix-los a la cistella en un clic.</p></section>
 
-<script>
-  fetch("header.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("header-placeholder").innerHTML = data;
-      const path = window.location.pathname.split("/").pop();
-      document.querySelectorAll("nav a").forEach(link => {
-        if (link.getAttribute("href") === path) {
-          link.classList.add("active");
-        }
-      });
-    });
-</script>
-
-
-  <main>
-    <input type="text" id="buscador" placeholder="Buscar por título o autor..." />
-    <section id="venta-libros" class="book-list">
-      <!-- Aquí aparecerán los libros en venta -->
+    <section>
+      <div class="controls">
+        <input id="search" placeholder="Filtra per títol o autor" />
+        <select id="sort">
+          <option value="title">Ordena per títol</option>
+          <option value="author">Ordena per autor</option>
+        </select>
+      </div>
+      <div id="saleBooks" class="grid"></div>
     </section>
-  </main>
+  </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+  <script src="app.js"></script>
+  <script>
+    app.loadHeader();
+    const search = document.getElementById('search');
+    const sort = document.getElementById('sort');
+    const saleBooks = document.getElementById('saleBooks');
+    let books = [];
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCu7RCPKPQbIkdG6OFYD6pIaMV4MfJBRg0",
-    authDomain: "la-ultima-frontera.firebaseapp.com",
-    databaseURL: "https://la-ultima-frontera-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "la-ultima-frontera",
-    storageBucket: "la-ultima-frontera.appspot.com",
-    messagingSenderId: "802228739297",
-    appId: "1:802228739297:web:f62a20578ec69912ee2ba0"
-  };
+    function render() {
+      const q = search.value.toLowerCase();
+      const sorted = [...books]
+        .filter((b) => b.venta)
+        .filter((b) => `${b.titulo} ${b.autor}`.toLowerCase().includes(q))
+        .sort((a, b) => a[sort.value].localeCompare(b[sort.value]));
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const librosRef = ref(db, 'libros');
+      saleBooks.innerHTML = sorted.length ? '' : '<p class="notice">No hi ha llibres en venda amb aquests filtres.</p>';
 
-  const contenedor = document.getElementById('venta-libros');
-  const buscador = document.getElementById('buscador');
-
-  function renderizarLibros(libros) {
-    contenedor.innerHTML = '';  // Limpiar antes de renderizar
-
-    if (!libros || Object.keys(libros).length === 0) {
-      contenedor.innerHTML = "<p>No hay libros disponibles para la venta.</p>";
-      return;
+      sorted.forEach((b) => {
+        const card = document.createElement('article');
+        card.className = 'card book-item';
+        card.innerHTML = `
+          <h3>${b.titulo}</h3>
+          <p><strong>Autor:</strong> ${b.autor}</p>
+          <p>${b.descripcion}</p>
+          <button>Afegir a la cistella</button>
+        `;
+        card.querySelector('button').addEventListener('click', () => {
+          const ok = app.addToCart({ titulo: b.titulo, autor: b.autor, precio: b.precio || 0 });
+          alert(ok ? 'Llibre afegit a la cistella.' : 'Aquest llibre ja és a la cistella.');
+        });
+        saleBooks.appendChild(card);
+      });
     }
 
-    for (let id in libros) {
-      const libro = libros[id];
-      if (!libro.precio) continue;  // Mostrar solo libros con precio
-
-      const div = document.createElement('div');
-      div.className = 'book-item';
-      div.innerHTML = `
-        <h3>${libro.titulo}</h3>
-        <p><strong>Autor:</strong> ${libro.autor}</p>
-        <p>${libro.descripcion || ''}</p>
-        <p><strong>Estado:</strong> ${libro.estado || 'Desconocido'}</p>
-        <p><strong>Precio:</strong> ${libro.precio}€</p>
-        <button onclick="añadirACesta('${id}', \`${libro.titulo}\`, \`${libro.autor}\`, \`${libro.precio}\`)">Añadir a la cesta</button>
-      `;
-      contenedor.appendChild(div);
-    }
-  }
-
-  onValue(librosRef, snapshot => {
-    const datos = snapshot.val() || {};
-    renderizarLibros(datos);
-
-    buscador.addEventListener('input', () => {
-      const filtro = buscador.value.toLowerCase();
-      const filtrados = Object.fromEntries(
-        Object.entries(datos).filter(([_, libro]) =>
-          (libro.titulo + libro.autor).toLowerCase().includes(filtro) && libro.precio
-        )
-      );
-      renderizarLibros(filtrados);
+    app.getBooks().then((data) => {
+      books = data.map((b) => ({ ...b, precio: b.precio || (b.venta ? 15 : 0) }));
+      render();
     });
-  });
 
-  window.añadirACesta = function(id, titulo, autor, precio) {
-    const libro = { id, titulo, autor, precio };
-    let cesta = JSON.parse(localStorage.getItem('cesta')) || [];
-
-    if (cesta.some(item => item.id === id)) {
-      alert('Este libro ya está en la cesta.');
-      return;
-    }
-
-    cesta.push(libro);
-    localStorage.setItem('cesta', JSON.stringify(cesta));
-    alert(`"${titulo}" añadido a la cesta.`);
-  };
-</script>
-
+    search.addEventListener('input', render);
+    sort.addEventListener('change', render);
+  </script>
 </body>
 </html>
-

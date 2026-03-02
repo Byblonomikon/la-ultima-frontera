@@ -1,199 +1,56 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cesta de la Compra – La Última Frontera</title>
-  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cistella · La Última Frontera</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: 'IM Fell DW Pica', serif;
-      background-color: #121212;
-      color: #f5f5f5;
-    }
-   header {
-      background-color: #1e1e1e;
-      padding: 1rem;
-      text-align: center;
-      border-bottom: 2px solid #444;
-    }
-    header h1 {
-      margin: 0;
-      color: #d4af37;
-    }
-    nav a {
-      margin: 0 1rem;
-      color: #f5f5f5;
-      text-decoration: none;
-    }
-    nav a:hover {
-      color: #d4af37;
-    }
-    section {
-      padding: 2rem;
-    }
-    .book-item {
-      background-color: #2a2a2a;
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 8px;
-      border: 1px solid #d4af37;
-    }
-    .book-item h3 {
-      color: #d4af37;
-    }
-    .book-item p {
-      color: #bbb;
-    }
-    .acciones {
-      margin-top: 2rem;
-    }
-    button {
-      padding: 0.6rem 1rem;
-      margin-right: 1rem;
-      background-color: #d4af37;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #b58d2d;
-    }
-  </style>
 </head>
 <body>
-  <div id="header-placeholder"></div>
+  <div class="page">
+    <div id="header-placeholder"></div>
+    <section class="hero"><h1>Cistella</h1><p>Revisa la selecció i finalitza la teva comanda per correu.</p></section>
 
-<script>
-  fetch("header.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("header-placeholder").innerHTML = data;
-      const path = window.location.pathname.split("/").pop();
-      document.querySelectorAll("nav a").forEach(link => {
-        if (link.getAttribute("href") === path) {
-          link.classList.add("active");
-        }
-      });
-    });
-</script>
-
-
-  <main>
-    <section id="lista-cesta">
-      <!-- Aquí se listan los libros de la cesta -->
+    <section>
+      <div id="cartList" class="grid"></div>
+      <p id="total" class="card"></p>
+      <button id="clearBtn">Buidar cistella</button>
     </section>
+  </div>
 
-    <section class="acciones">
-      <button onclick="vaciarCesta()">Vaciar Cesta</button>
-      <button onclick="enviarPedido()">Enviar Pedido</button>
-    </section>
-  </main>
-
-  <form id="pedido-form">
-  <h3>Datos del comprador</h3>
-  <input type="text" name="name" placeholder="Nombre" required />
-  <input type="email" name="email" placeholder="Correo electrónico" required />
-  <input type="text" name="direccion" placeholder="Dirección de envío" required />
-  <textarea name="mensaje" placeholder="Mensaje adicional (opcional)"></textarea>
-  <button type="submit">Tramitar pedido</button>
-</form>
-
-
+  <script src="app.js"></script>
   <script>
-    const contenedor = document.getElementById('lista-cesta');
+    app.loadHeader();
+    const cartList = document.getElementById('cartList');
+    const total = document.getElementById('total');
 
-    function cargarCesta() {
-      const cesta = JSON.parse(localStorage.getItem('cesta')) || [];
+    function drawCart() {
+      const cart = app.getCart();
+      cartList.innerHTML = '';
 
-      contenedor.innerHTML = '';
-
-      if (cesta.length === 0) {
-        contenedor.innerHTML = '<p>Tu cesta está vacía.</p>';
+      if (!cart.length) {
+        total.textContent = 'La cistella està buida.';
         return;
       }
 
-      let total = 0;
-
-      cesta.forEach(libro => {
-        total += parseFloat(libro.precio || 0);
-
-        const div = document.createElement('div');
-        div.className = 'book-item';
-        div.innerHTML = `
-          <h3>${libro.titulo}</h3>
-          <p><strong>Autor:</strong> ${libro.autor}</p>
-          <p><strong>Precio:</strong> ${libro.precio}€</p>
-        `;
-        contenedor.appendChild(div);
+      let sum = 0;
+      cart.forEach((item) => {
+        sum += Number(item.precio || 0);
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `<h3>${item.titulo}</h3><p>${item.autor}</p><p>${Number(item.precio).toFixed(2)} €</p>`;
+        cartList.appendChild(card);
       });
-
-      const totalDiv = document.createElement('div');
-      totalDiv.className = 'book-item';
-      totalDiv.innerHTML = `<h3>Total: ${total.toFixed(2)}€</h3>`;
-      contenedor.appendChild(totalDiv);
+      total.textContent = `Total estimat: ${sum.toFixed(2)} €`;
     }
 
-    function vaciarCesta() {
-      if (confirm('¿Seguro que quieres vaciar la cesta?')) {
-        localStorage.removeItem('cesta');
-        cargarCesta();
-      }
-    }
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      app.setCart([]);
+      drawCart();
+    });
 
-    function enviarPedido() {
-      const cesta = JSON.parse(localStorage.getItem('cesta')) || [];
-
-      if (cesta.length === 0) {
-        alert('Tu cesta está vacía.');
-        return;
-      }
-
-      const resumen = cesta.map(libro => `${libro.titulo} (${libro.precio}€)`).join('\n');
-      alert('Pedido enviado (simulado):\n\n' + resumen);
-
-      localStorage.removeItem('cesta');
-      cargarCesta();
-    }
-
-    cargarCesta();
+    drawCart();
   </script>
-
-  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
-<script>
-  emailjs.init("XaW3zyfmcQShbR9Nr"); // pon tu clave pública aquí
-
-  document.getElementById("pedido-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const form = this;
-    const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-    const pedidoResumen = carrito.map(libro => `- ${libro.titulo} (${libro.autor})`).join('\n');
-
-    const templateParams = {
-      name: form.name.value,
-      email: form.email.value,
-      direccion: form.direccion.value,
-      mensaje: form.mensaje.value,
-      pedido: pedidoResumen
-    };
-
-    emailjs.send("service_cyzatnf", "template_hzgvgmm", templateParams)
-      .then(() => {
-        alert("Pedido enviado correctamente. Gracias por tu compra.");
-        form.reset();
-        localStorage.removeItem("carrito");
-      }, (error) => {
-        alert("Error al enviar el pedido. Intenta de nuevo.");
-        console.error(error);
-      });
-  });
-</script>
-
 </body>
 </html>

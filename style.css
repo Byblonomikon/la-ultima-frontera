@@ -1,158 +1,101 @@
+:root {
+  --bg: #0b1020;
+  --surface: rgba(19, 29, 53, 0.72);
+  --card: rgba(19, 29, 53, 0.9);
+  --text: #eff3ff;
+  --muted: #b8c3e6;
+  --accent: #66d9ff;
+  --accent-2: #a88bff;
+  --border: rgba(102, 217, 255, 0.3);
+}
 
-/* Estilo global para el body */
+:root[data-theme="light"] {
+  --bg: #f3f6ff;
+  --surface: rgba(255, 255, 255, 0.9);
+  --card: #ffffff;
+  --text: #18203a;
+  --muted: #4d5a85;
+  --accent: #005fe1;
+  --accent-2: #6f39fa;
+  --border: rgba(0, 95, 225, 0.25);
+}
+
+* { box-sizing: border-box; }
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #121212;
-  color: #eaeaea;
-  line-height: 1.8;
-  padding: 2rem;
-  max-width: 960px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: left; /* Centra el contenido horizontalmente */
-
-       /* Añadir imagen de fondo */
-    background-image: url('https://wallpapercat.com/w/full/7/6/4/1326128-1920x1200-desktop-hd-book-wallpaper.jpg'); /* Reemplaza con la URL de tu imagen */
-    background-size: contain; /* Hace que la imagen cubra todo el fondo */
-    background-position: center; /* Centra la imagen en la página */
-    background-attachment: fixed; /* Hace que la imagen de fondo se quede fija al hacer scroll */
-    background-repeat: no-repeat; /* Asegura que no se repita la imagen si es más pequeña */
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at 0 0, #1b2952, var(--bg));
+  min-height: 100vh;
 }
 
-/* Estilo para el contenedor del header */
-.header-container {
+a { color: inherit; }
+
+.page {
+  width: min(1100px, 92%);
+  margin: 1.4rem auto 2rem;
+}
+
+.site-header {
   display: flex;
-  justify-content: center;  /* Centra el logo y el título */
-  align-items: center;      /* Centra verticalmente */
-  margin-bottom: 20px;      /* Separación entre el header y el menú */
   gap: 1rem;
-}
-
-header {
-  background-color: #f8f8f8;
-  padding: 1rem 2rem;
-  display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #ddd;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 0.8rem 1rem;
 }
+.brand { display:flex; gap:.7rem; text-decoration:none; align-items:center; }
+.brand-mark { font-size: 1.6rem; color: var(--accent); }
+.brand small { display:block; color: var(--muted); }
+.site-nav { display:flex; flex-wrap:wrap; gap: .8rem; }
+.site-nav a { text-decoration:none; padding: .35rem .65rem; border-radius: 10px; color: var(--muted); }
+.site-nav a.active,.site-nav a:hover { background: rgba(102,217,255,.13); color: var(--text); }
+.theme-toggle { border:1px solid var(--border); background:transparent; color:var(--text); border-radius: 10px; padding:.45rem .7rem; cursor:pointer; }
+#cart-badge { background: var(--accent); color:#051126; border-radius:999px; padding: .1rem .45rem; margin-left:.3rem; font-size:.8rem; }
 
-header h2 {
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  margin: 0;
+.hero {
+  margin-top: 1.2rem;
+  padding: 2rem;
+  border-radius: 20px;
+  background: linear-gradient(125deg, rgba(102,217,255,.18), rgba(168,139,255,.2));
+  border: 1px solid var(--border);
 }
+.hero h1 { margin-top:0; font-size: clamp(1.8rem, 3vw, 2.8rem); }
+.hero p { color: var(--muted); max-width: 70ch; }
 
-nav a {
-  margin-left: 1rem;
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-nav a:hover {
-  color: #007bff;
-}
-
-nav a.active {
-  color: #007bff;
-  font-weight: 600;
-}
-
-.logo {
-  width: 50px;             /* Tamaño del logo, ajusta como necesites */
-  height: auto;
-  margin-right: 10px;      /* Espacio entre el logo y el título */
-}
-
-h1 {
-  font-size: 2.5rem;       /* Tamaño del título */
-  color: var(--accent);    /* Color del título */
-  margin: 0;
-}
-
-/* Estilo del menú de navegación */
-nav {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  background-color: rgba(0, 0, 0, 0.2);
+.grid { display:grid; gap:1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top:1rem; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   padding: 1rem;
-  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.18);
 }
+.book-item h3 { margin: .2rem 0 .5rem; }
+.book-item p { margin: .3rem 0; color: var(--muted); }
 
-.nav-links {
-  list-style: none;
-  display: flex;
-  padding: 0;
-  margin: 0;
-}
-
-.nav-links a {
-  color: #eee;
-  text-decoration: none;
-  font-size: 1.2rem;
-  transition: color 0.3s ease;
-}
-
-
-
-/* Estilo para el contenido */
-section {
-  width: 80%;                  /* Define el ancho máximo del contenido */
-  max-width: 1200px;           /* Limita el ancho a 1200px */
-  margin: 20px auto;           /* Centra el contenido y agrega un margen superior */
-  padding: 10px;
-  text-align: left;            /* Alinea el texto a la izquierda */
-  line-height: 1.6;            /* Espaciado entre líneas */
-}
-.book-item {
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    transition: transform 0.2s ease;
-    background-color: #222;
-    padding: 15px;
-    margin-bottom: 20px;
-    border-left: 4px solid #d4af37;
-}
-.book-item:hover {
-  transform: scale(1.02);
-}
-
-:root {
-  --background: #121212;
-  --foreground: #f0f0f0;
-  --accent: #f4b400;  /* dorado más brillante */
-  --muted: #888;
-}
-
-input, button {
-  padding: 0.8rem;
-  border-radius: 6px;
-  border: none;
-  margin: 0.5rem 0;
+input, select, textarea, button {
   width: 100%;
-  max-width: 400px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: .65rem .75rem;
 }
+button { cursor:pointer; font-weight:600; }
+button:hover { transform: translateY(-1px); }
+.controls { display:grid; grid-template-columns: 1fr 220px; gap:.7rem; margin:1rem 0; }
 
-input:focus, button:hover {
-  outline: 2px solid var(--accent);
-  background-color: #333;
-}
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:.8rem; margin-top:1rem; }
+.stat { text-align:center; padding:.9rem; border-radius:14px; background:var(--surface); border:1px solid var(--border); }
+.stat strong { display:block; font-size:1.4rem; }
 
-@media (max-width: 600px) {
-  header h1 {
-    font-size: 2rem;
-  }
+.notice { color: var(--muted); font-style: italic; }
 
-  nav {
-    flex-direction: column;
-    align-items: center;
-  }
-}
-
-body, nav, .book-item, button {
-  transition: all 0.3s ease;
+@media (max-width: 700px){
+  .site-header { flex-direction: column; align-items: stretch; }
+  .controls { grid-template-columns: 1fr; }
 }
