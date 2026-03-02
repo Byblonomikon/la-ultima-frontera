@@ -1,11 +1,56 @@
 const HEADER_PATH = 'header.html';
 
+const FALLBACK_BOOKS = [
+  {
+    titulo: 'Leviatán',
+    autor: 'Thomas Hobbes',
+    descripcion: 'Edició en castellà del clàssic del pensament polític sobre poder, contracte social i naturalesa humana.',
+    estado: 'Muy bueno',
+    venta: false,
+    precio: 0,
+    isbn: ''
+  },
+  {
+    titulo: '1984',
+    autor: 'George Orwell',
+    descripcion: 'Distopia essencial sobre vigilància, repressió i llibertat individual.',
+    estado: 'Bueno',
+    venta: true,
+    precio: 12,
+    isbn: ''
+  },
+  {
+    titulo: 'El nom de la rosa',
+    autor: 'Umberto Eco',
+    descripcion: 'Novel·la històrica i detectivesca que barreja teologia, poder i biblioteques medievals.',
+    estado: 'Muy bueno',
+    venta: true,
+    precio: 18,
+    isbn: ''
+  },
+  {
+    titulo: "Pedagogia de l'oprimit",
+    autor: 'Paulo Freire',
+    descripcion: 'Text clau per repensar educació, emancipació i consciència crítica.',
+    estado: 'Bueno',
+    venta: true,
+    precio: 14,
+    isbn: ''
+  }
+];
+
 async function loadHeader() {
   const placeholder = document.getElementById('header-placeholder');
   if (!placeholder) return;
 
-  const res = await fetch(HEADER_PATH);
-  placeholder.innerHTML = await res.text();
+  try {
+    const res = await fetch(HEADER_PATH);
+    if (!res.ok) throw new Error('No s\'ha pogut carregar el header');
+    placeholder.innerHTML = await res.text();
+  } catch (error) {
+    console.error(error);
+    placeholder.innerHTML = '';
+  }
 
   const path = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.site-nav a').forEach((link) => {
@@ -16,14 +61,16 @@ async function loadHeader() {
   const root = document.documentElement;
   const savedTheme = localStorage.getItem('theme') || 'dark';
   root.dataset.theme = savedTheme;
-  toggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+  if (toggle) toggle.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
 
-  toggle.addEventListener('click', () => {
-    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    root.dataset.theme = next;
-    localStorage.setItem('theme', next);
-    toggle.textContent = next === 'dark' ? '🌙' : '☀️';
-  });
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem('theme', next);
+      toggle.textContent = next === 'dark' ? '🌙' : '☀️';
+    });
+  }
 
   updateCartBadge();
 }
@@ -51,10 +98,26 @@ function addToCart(book) {
 }
 
 async function getBooks() {
-  const res = await fetch('data/libros.json');
-  const baseBooks = await res.json();
+  let baseBooks = [];
+  try {
+    const res = await fetch('data/libros.json');
+    if (!res.ok) throw new Error('No s\'ha pogut carregar el catàleg base');
+    baseBooks = await res.json();
+  } catch (error) {
+    console.error(error);
+    baseBooks = FALLBACK_BOOKS;
+  }
+
   const customBooks = getCustomBooks();
-  return [...customBooks, ...baseBooks];
+  return [...customBooks, ...baseBooks].map((book) => ({
+    titulo: book.titulo || 'Sense títol',
+    autor: book.autor || 'Autor desconegut',
+    descripcion: book.descripcion || 'Sense descripció',
+    estado: book.estado || 'Bueno',
+    venta: Boolean(book.venta),
+    precio: Number(book.precio || 0),
+    isbn: book.isbn || ''
+  }));
 }
 
 function getCustomBooks() {
