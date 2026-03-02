@@ -109,8 +109,23 @@ button:hover { transform: translateY(-1px); }
   gap: .7rem;
 }
 
+.add-book-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: .7rem;
+  margin-top: .7rem;
+}
+
+.add-book-meta label {
+  display: grid;
+  gap: .4rem;
+  color: var(--muted);
+  font-size: .95rem;
+}
+
 @media (max-width: 700px){
   .site-header { flex-direction: column; align-items: stretch; }
   .controls { grid-template-columns: 1fr; }
   .add-book-controls { grid-template-columns: 1fr; }
+  .add-book-meta { grid-template-columns: 1fr; }
 }
