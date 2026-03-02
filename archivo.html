@@ -39,6 +39,10 @@
         <button id="copySyncLinkBtn" type="button">Copiar enllaç de sincronització</button>
         <p class="notice" style="margin:0;align-self:center;">Els llibres afegits es guarden al navegador actual. Usa aquest enllaç per passar-los al mòbil.</p>
       </div>
+      <div class="add-book-controls" style="margin-top:.6rem;">
+        <button id="copySyncLinkBtn" type="button">Copiar enllaç de sincronització</button>
+        <p class="notice" style="margin:0;align-self:center;">Els llibres afegits es guarden al navegador actual. Usa aquest enllaç per passar-los al mòbil.</p>
+      </div>
       <p id="isbnMessage" class="notice"></p>
       <div id="googlePreview"></div>
     </section>
@@ -160,6 +164,7 @@
           <option value="false">No</option>
         </select>
         <button id="saveBookBtn" type="button">Afegir aquest llibre a l'arxiu</button>
+        <button id="saveBookBtn">Afegir aquest llibre a l'arxiu</button>
       `;
       googlePreview.innerHTML = '';
       googlePreview.appendChild(card);
