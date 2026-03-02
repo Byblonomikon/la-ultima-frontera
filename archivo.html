@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Arxiu · La Última Frontera</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260302b" />
 </head>
 <body>
   <div class="page">
@@ -17,8 +20,12 @@
         <input id="search" placeholder="Cerca per títol, autor o descripció" />
         <select id="statusFilter">
           <option value="all">Tots els estats</option>
-          <option value="Muy bueno">Molt bo</option>
-          <option value="Bueno">Bo</option>
+          <option value="malmès">Malmès</option>
+          <option value="usat">Usat</option>
+          <option value="en bon estat">En bon estat</option>
+          <option value="com nou">Com nou</option>
+          <option value="Bueno">Bo (antic)</option>
+          <option value="Muy bueno">Molt bo (antic)</option>
         </select>
       </div>
       <div id="books" class="grid"></div>
@@ -29,14 +36,38 @@
       <p>Introdueix l'ISBN (o codi de barres) i recuperarem la informació des de Google Books.</p>
       <div class="add-book-controls">
         <input id="isbnInput" placeholder="Ex: 9780141036144" />
-        <button id="isbnSearchBtn">Buscar a Google Books</button>
+        <button id="isbnSearchBtn" type="button">Buscar a Google Books</button>
+      </div>
+      <div class="add-book-meta">
+        <p class="notice" style="grid-column: 1 / -1; margin: 0;">Aquests camps (estat/preu) sempre s'apliquen quan guardes el llibre trobat.</p>
+        <label>Estat del llibre
+          <select id="newBookCondition">
+            <option value="malmès">Malmès</option>
+            <option value="usat" selected>Usat</option>
+            <option value="en bon estat">En bon estat</option>
+            <option value="com nou">Com nou</option>
+          </select>
+        </label>
+        <label>Preu (€)
+          <input id="newBookPrice" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label>Mostrar a Botiga
+          <select id="newBookForSale">
+            <option value="true" selected>Sí</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+      </div>
+      <div class="add-book-controls" style="margin-top:.6rem;">
+        <button id="copySyncLinkBtn" type="button">Copiar enllaç de sincronització</button>
+        <p class="notice" style="margin:0;align-self:center;">Els llibres afegits es guarden al navegador actual. Usa aquest enllaç per passar-los al mòbil.</p>
       </div>
       <p id="isbnMessage" class="notice"></p>
       <div id="googlePreview"></div>
     </section>
   </div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20260302b"></script>
   <script>
     app.loadHeader();
 
@@ -45,8 +76,12 @@
     const booksEl = document.getElementById('books');
     const isbnInput = document.getElementById('isbnInput');
     const isbnSearchBtn = document.getElementById('isbnSearchBtn');
+    const copySyncLinkBtn = document.getElementById('copySyncLinkBtn');
     const isbnMessage = document.getElementById('isbnMessage');
     const googlePreview = document.getElementById('googlePreview');
+    const newBookCondition = document.getElementById('newBookCondition');
+    const newBookPrice = document.getElementById('newBookPrice');
+    const newBookForSale = document.getElementById('newBookForSale');
     let allBooks = [];
 
     function draw() {
@@ -85,8 +120,47 @@
     search.addEventListener('input', draw);
     statusFilter.addEventListener('change', draw);
 
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'llibresCustom') {
+        app.getBooks().then((books) => { allBooks = books; draw(); });
+      }
+    });
+
     function setMessage(text) {
       isbnMessage.textContent = text;
+    }
+
+    function setSearchingState(isSearching) {
+      isbnSearchBtn.disabled = isSearching;
+      isbnSearchBtn.textContent = isSearching ? 'Buscant...' : 'Buscar a Google Books';
+      isbnInput.disabled = isSearching;
+    }
+
+    async function copySyncLink() {
+      const token = app.exportCustomBooksToken();
+      const url = new URL(window.location.href);
+      url.searchParams.set('llibres', token);
+
+      try {
+        await navigator.clipboard.writeText(url.toString());
+        setMessage('Enllaç copiat. Obre\'l al mòbil per importar els llibres afegits.');
+      } catch (error) {
+        console.error(error);
+        setMessage(`No s'ha pogut copiar automàticament. Copia aquest enllaç manualment: ${url.toString()}`);
+      }
+    }
+
+    copySyncLinkBtn.addEventListener('click', copySyncLink);
+
+    const tokenFromUrl = new URLSearchParams(window.location.search).get('llibres');
+    if (tokenFromUrl) {
+      const imported = app.importCustomBooksToken(tokenFromUrl);
+      if (imported.ok) {
+        setMessage(`S'han importat ${imported.added} llibre(s) des de l'enllaç de sincronització.`);
+        app.getBooks().then((books) => { allBooks = books; draw(); });
+      } else {
+        setMessage('No s\'ha pogut importar l\'enllaç de sincronització.');
+      }
     }
 
     function drawPreview(book) {
@@ -97,25 +171,64 @@
         <p><strong>Autor:</strong> ${book.autor}</p>
         <p>${book.descripcion}</p>
         <p><strong>ISBN:</strong> ${book.isbn}</p>
-        <button id="saveBookBtn">Afegir aquest llibre a l'arxiu</button>
+        <p class="notice">Configura també aquí l'estat i el preu (mateixos valors que a dalt).</p>
+        <label for="previewBookCondition">Estat del llibre</label>
+        <select id="previewBookCondition">
+          <option value="malmès">Malmès</option>
+          <option value="usat">Usat</option>
+          <option value="en bon estat">En bon estat</option>
+          <option value="com nou">Com nou</option>
+        </select>
+        <label for="previewBookPrice">Preu (€)</label>
+        <input id="previewBookPrice" type="number" min="0" step="0.01" value="0" />
+        <button id="saveBookBtn" type="button">Afegir aquest llibre a l'arxiu</button>
       `;
       googlePreview.innerHTML = '';
       googlePreview.appendChild(card);
 
+      const previewBookCondition = card.querySelector('#previewBookCondition');
+      const previewBookPrice = card.querySelector('#previewBookPrice');
+      previewBookCondition.value = newBookCondition.value;
+      previewBookPrice.value = newBookPrice.value;
+
+      previewBookCondition.addEventListener('change', () => {
+        newBookCondition.value = previewBookCondition.value;
+      });
+
+      previewBookPrice.addEventListener('input', () => {
+        newBookPrice.value = previewBookPrice.value;
+      });
+
       card.querySelector('#saveBookBtn').addEventListener('click', () => {
-        const added = app.saveCustomBook(book);
+        const condition = previewBookCondition.value;
+        const price = Number(previewBookPrice.value || 0);
+        const forSale = newBookForSale.value === 'true';
+        if (Number.isNaN(price) || price < 0) {
+          setMessage('Introdueix un preu vàlid (0 o superior).');
+          return;
+        }
+
+        const enrichedBook = {
+          ...book,
+          estado: condition,
+          venta: forSale,
+          precio: Number(price.toFixed(2))
+        };
+
+        const added = app.saveCustomBook(enrichedBook);
         if (!added) {
           setMessage('Aquest ISBN ja s\'ha afegit abans.');
           return;
         }
 
-        allBooks.unshift(book);
+        allBooks.unshift(enrichedBook);
         draw();
-        setMessage('Llibre afegit correctament a l\'arxiu local.');
+        setMessage('Llibre afegit correctament a aquest dispositiu. Si el vols al mòbil, copia l\'enllaç de sincronització.');
       });
     }
 
-    isbnSearchBtn.addEventListener('click', async () => {
+    isbnSearchBtn.addEventListener('click', async (event) => {
+      event.preventDefault();
       const code = isbnInput.value.trim();
       googlePreview.innerHTML = '';
 
@@ -124,16 +237,33 @@
         return;
       }
 
-      setMessage('Buscant llibre a Google Books...');
-      const book = await app.fetchGoogleBookByIsbn(code);
+      setSearchingState(true);
+      setMessage('Buscant llibre a Google Books... (pot trigar uns segons)');
+      const result = await app.fetchGoogleBookByIsbn(code, { timeoutMs: 12000 });
+      setSearchingState(false);
 
-      if (!book) {
-        setMessage('No s\'ha trobat cap llibre amb aquest codi.');
+      if (result.status === 'ok') {
+        setMessage('Resultat trobat. Revisa la fitxa i afegeix-lo si vols.');
+        drawPreview(result.book);
         return;
       }
 
-      setMessage('Resultat trobat. Revisa la fitxa i afegeix-lo si vols.');
-      drawPreview(book);
+      if (result.status === 'invalid_code') {
+        setMessage('El codi introduït no sembla un ISBN vàlid.');
+        return;
+      }
+
+      if (result.status === 'not_found') {
+        setMessage('No s\'ha trobat cap llibre amb aquest ISBN a Google Books.');
+        return;
+      }
+
+      if (result.status === 'timeout') {
+        setMessage('La cerca ha trigat massa (12s). Torna-ho a provar en uns moments.');
+        return;
+      }
+
+      setMessage('Hi ha hagut un problema de connexió amb Google Books. Torna-ho a provar.');
     });
   </script>
 </body>
