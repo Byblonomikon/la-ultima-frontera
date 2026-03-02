@@ -109,34 +109,8 @@ button:hover { transform: translateY(-1px); }
   gap: .7rem;
 }
 
-.add-book-meta {
-  margin-top: .8rem;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: .7rem;
-}
-
-.add-book-meta label {
-  display: flex;
-  flex-direction: column;
-  gap: .4rem;
-  color: var(--muted);
-  font-size: .95rem;
-}
-
-.check-option {
-  flex-direction: row !important;
-  align-items: center;
-  gap: .6rem !important;
-}
-
-.check-option input {
-  width: auto;
-}
-
 @media (max-width: 700px){
   .site-header { flex-direction: column; align-items: stretch; }
   .controls { grid-template-columns: 1fr; }
   .add-book-controls { grid-template-columns: 1fr; }
-  .add-book-meta { grid-template-columns: 1fr; }
 }
