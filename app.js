@@ -50,6 +50,7 @@ async function loadHeader() {
   } catch (error) {
     console.error(error);
     placeholder.innerHTML = '';
+    return;
   }
 
   const path = window.location.pathname.split('/').pop() || 'index.html';
