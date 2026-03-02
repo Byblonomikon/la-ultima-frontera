@@ -182,6 +182,7 @@ function saveCustomBook(book) {
   return true;
 }
 
+function normalizeFetchedBook(info, isbn) {
 async function fetchGoogleBookByIsbn(code, options = {}) {
   const timeoutMs = Number(options.timeoutMs || 12000);
   const cleanCode = code.replace(/[^\dXx]/g, '');
@@ -230,6 +231,69 @@ async function fetchGoogleBookByIsbn(code, options = {}) {
     estado: 'Muy bueno',
     venta: false,
     precio: 0,
+    isbn
+  };
+}
+
+async function fetchGoogleBookByIsbn(code, options = {}) {
+  const timeoutMs = Number(options.timeoutMs || 12000);
+  const cleanCode = code.replace(/[^\dXx]/g, '');
+  if (!cleanCode) return { status: 'invalid_code', book: null };
+
+  async function fetchJsonWithTimeout(url) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!response.ok) return { status: 'api_error', data: null };
+      const data = await response.json();
+      return { status: 'ok', data };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error && error.name === 'AbortError') return { status: 'timeout', data: null };
+      console.error(error);
+      return { status: 'network_error', data: null };
+    }
+  }
+
+  const google = await fetchJsonWithTimeout(
+    `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(cleanCode)}`
+  );
+
+  if (google.status === 'ok') {
+    const item = google.data.items && google.data.items.length ? google.data.items[0] : null;
+    if (item) {
+      return { status: 'ok', book: normalizeFetchedBook(item.volumeInfo || {}, cleanCode) };
+    }
+  } else if (google.status === 'timeout') {
+    return { status: 'timeout', book: null };
+  }
+
+  const openLibrary = await fetchJsonWithTimeout(`https://openlibrary.org/isbn/${encodeURIComponent(cleanCode)}.json`);
+  if (openLibrary.status !== 'ok') {
+    if (google.status === 'api_error' || openLibrary.status === 'api_error') return { status: 'api_error', book: null };
+    if (google.status === 'network_error' || openLibrary.status === 'network_error') return { status: 'network_error', book: null };
+    if (openLibrary.status === 'timeout') return { status: 'timeout', book: null };
+    return { status: 'not_found', book: null };
+  }
+
+  const olData = openLibrary.data || {};
+  let author = 'Autor desconegut';
+  if (Array.isArray(olData.authors) && olData.authors.length > 0) {
+    author = 'Autoria disponible a Open Library';
+  }
+
+  return {
+    status: 'ok',
+    book: {
+      titulo: olData.title || 'Sense títol',
+      autor: author,
+      descripcion: (olData.subtitle || 'Resultat obtingut d’Open Library.'),
+      estado: 'Muy bueno',
+      venta: false,
+      precio: 0,
+      isbn: cleanCode
     isbn: cleanCode
     }
   };
