@@ -23,6 +23,34 @@
       </div>
       <div id="books" class="grid"></div>
     </section>
+
+    <section id="add-book-section" class="card add-book">
+      <h2>Afegir llibre des de Google Books</h2>
+      <p>Introdueix l'ISBN, codi de barres o paraules clau i recuperarem informació i valoracions.</p>
+      <div class="add-book-controls">
+        <input id="isbnInput" placeholder="Ex: 9780141036144 o títol del llibre" />
+        <button id="isbnSearchBtn">Buscar a Google Books</button>
+      </div>
+      <div class="add-book-meta">
+        <label>
+          Estat del llibre
+          <select id="bookStateInput">
+            <option value="Muy bueno">Molt bo</option>
+            <option value="Bueno">Bo</option>
+          </select>
+        </label>
+        <label>
+          Preu (€)
+          <input id="bookPriceInput" type="number" min="0" step="0.01" value="0" />
+        </label>
+        <label class="check-option">
+          <input id="bookForSaleInput" type="checkbox" />
+          Disponible per compra directa
+        </label>
+      </div>
+      <p id="isbnMessage" class="notice" role="status" aria-live="polite"></p>
+      <div id="googlePreview"></div>
+    </section>
   </div>
 
   <script src="app.js"></script>
@@ -32,7 +60,52 @@
     const search = document.getElementById('search');
     const statusFilter = document.getElementById('statusFilter');
     const booksEl = document.getElementById('books');
+    const isbnInput = document.getElementById('isbnInput');
+    const isbnSearchBtn = document.getElementById('isbnSearchBtn');
+    const bookStateInput = document.getElementById('bookStateInput');
+    const bookPriceInput = document.getElementById('bookPriceInput');
+    const bookForSaleInput = document.getElementById('bookForSaleInput');
+    const isbnMessage = document.getElementById('isbnMessage');
+    const googlePreview = document.getElementById('googlePreview');
+    let currentPreviewBook = null;
     let allBooks = [];
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderReview(book) {
+      const review = book.review || {};
+      const score = review.averageRating ? `${review.averageRating}/5` : 'Sense puntuació';
+      const votes = review.ratingsCount ? `${review.ratingsCount} valoracions` : 'Sense valoracions';
+      const meta = [review.publishedDate, (review.categories || []).join(', ')].filter(Boolean).join(' · ');
+      const previewLink = review.previewLink
+        ? `<p><a href="${escapeHtml(review.previewLink)}" target="_blank" rel="noopener noreferrer">Veure fitxa a Google Books</a></p>`
+        : '';
+
+      return `
+        <div class="book-review">
+          <p><strong>Review Google:</strong> ${escapeHtml(score)} · ${escapeHtml(votes)}</p>
+          ${meta ? `<p>${escapeHtml(meta)}</p>` : ''}
+          ${previewLink}
+        </div>
+      `;
+    }
+
+    function formatPrice(value) {
+      return `${Number(value || 0).toFixed(2)} €`;
+    }
+
+    function updatePriceState() {
+      const isForSale = bookForSaleInput.checked;
+      bookPriceInput.disabled = !isForSale;
+      if (!isForSale) bookPriceInput.value = '0';
+    }
 
     function draw() {
       const q = search.value.toLowerCase();
@@ -47,7 +120,23 @@
       filtered.forEach((b) => {
         const card = document.createElement('article');
         card.className = 'card book-item';
-        card.innerHTML = `<h3>${b.titulo}</h3><p><strong>${b.autor}</strong></p><p>${b.descripcion}</p><p><strong>Estat:</strong> ${b.estado}</p>`;
+        card.innerHTML = `
+          <h3>${escapeHtml(b.titulo)}</h3>
+          <p><strong>${escapeHtml(b.autor)}</strong></p>
+          <p>${escapeHtml(b.descripcion)}</p>
+          ${b.isbn ? `<p><strong>ISBN:</strong> ${escapeHtml(b.isbn)}</p>` : ''}
+          ${renderReview(b)}
+          <p><strong>Estat:</strong> ${escapeHtml(b.estado || 'No indicat')}</p>
+          ${b.venta ? `<p><strong>Preu:</strong> ${formatPrice(b.precio)}</p><button class="add-to-cart-btn">Afegir a la llista de compra</button>` : ''}
+        `;
+
+        if (b.venta) {
+          card.querySelector('.add-to-cart-btn').addEventListener('click', () => {
+            const ok = app.addToCart({ titulo: b.titulo, autor: b.autor, precio: Number(b.precio || 0) });
+            alert(ok ? 'Llibre afegit a la cistella.' : 'Aquest llibre ja és a la cistella.');
+          });
+        }
+
         booksEl.appendChild(card);
       });
     }
@@ -55,6 +144,86 @@
     app.getBooks().then((books) => { allBooks = books; draw(); });
     search.addEventListener('input', draw);
     statusFilter.addEventListener('change', draw);
+    bookForSaleInput.addEventListener('change', updatePriceState);
+    updatePriceState();
+
+    function setMessage(text) {
+      isbnMessage.textContent = text;
+    }
+
+    function drawPreview(book) {
+      currentPreviewBook = book;
+      const review = book.review || {};
+      const card = document.createElement('article');
+      card.className = 'card book-item';
+      card.innerHTML = `
+        <h3>${escapeHtml(book.titulo)}</h3>
+        <p><strong>Autor:</strong> ${escapeHtml(book.autor)}</p>
+        <p>${escapeHtml(book.descripcion)}</p>
+        <p><strong>ISBN:</strong> ${escapeHtml(book.isbn || 'Sense ISBN')}</p>
+        ${review.thumbnail ? `<img class="book-thumb" src="${escapeHtml(review.thumbnail)}" alt="Coberta de ${escapeHtml(book.titulo)}" />` : ''}
+        ${renderReview(book)}
+        <button id="saveBookBtn">Afegir aquest llibre a l'arxiu</button>
+      `;
+      googlePreview.innerHTML = '';
+      googlePreview.appendChild(card);
+
+      card.querySelector('#saveBookBtn').addEventListener('click', () => {
+        const price = Number(bookPriceInput.value || 0);
+        if (bookForSaleInput.checked && price <= 0) {
+          setMessage('Si el llibre està en venda, has d\'indicar un preu superior a 0.');
+          return;
+        }
+
+        const enrichedBook = {
+          ...currentPreviewBook,
+          estado: bookStateInput.value,
+          venta: bookForSaleInput.checked,
+          precio: price
+        };
+        const added = app.saveCustomBook(enrichedBook);
+        if (!added) {
+          setMessage('Aquest ISBN ja s\'ha afegit abans.');
+          return;
+        }
+
+        allBooks.unshift(enrichedBook);
+        draw();
+        setMessage('Llibre afegit correctament a l\'arxiu local.');
+      });
+    }
+
+    isbnSearchBtn.addEventListener('click', async () => {
+      const code = isbnInput.value.trim();
+      googlePreview.innerHTML = '';
+
+      if (!code) {
+        setMessage('Introdueix un ISBN, codi de barres o paraules clau.');
+        return;
+      }
+
+      setMessage('Buscant llibre a Google Books...');
+      isbnSearchBtn.disabled = true;
+
+      let book = null;
+      try {
+        book = await app.fetchGoogleBook(code);
+      } finally {
+        isbnSearchBtn.disabled = false;
+      }
+
+      if (!book) {
+        setMessage('No s\'ha trobat cap llibre amb aquesta cerca.');
+        return;
+      }
+
+      setMessage('Resultat trobat. Revisa la fitxa, consulta la review i afegeix-lo si vols.');
+      drawPreview(book);
+    });
+
+    isbnInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') isbnSearchBtn.click();
+    });
   </script>
 </body>
 </html>

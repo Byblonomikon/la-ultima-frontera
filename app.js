@@ -44,7 +44,7 @@ function updateCartBadge() {
 
 function addToCart(book) {
   const cart = getCart();
-  if (cart.some((item) => item.titulo === book.titulo)) return false;
+  if (cart.some((item) => item.titulo === book.titulo && item.autor === book.autor)) return false;
   cart.push(book);
   setCart(cart);
   return true;
@@ -52,7 +52,99 @@ function addToCart(book) {
 
 async function getBooks() {
   const res = await fetch('data/libros.json');
-  return res.json();
+  const baseBooks = await res.json();
+  const customBooks = getCustomBooks();
+  return [...customBooks, ...baseBooks];
 }
 
-window.app = { loadHeader, getBooks, getCart, setCart, addToCart, updateCartBadge };
+function getCustomBooks() {
+  return JSON.parse(localStorage.getItem('llibresCustom') || '[]');
+}
+
+function saveCustomBook(book) {
+  const customBooks = getCustomBooks();
+  const alreadyExists = customBooks.some((item) => {
+    if (item.isbn && book.isbn) return item.isbn === book.isbn;
+    return item.titulo === book.titulo && item.autor === book.autor;
+  });
+  if (alreadyExists) return false;
+  customBooks.push(book);
+  localStorage.setItem('llibresCustom', JSON.stringify(customBooks));
+  return true;
+}
+
+function stripHtmlTags(text) {
+  return (text || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function mapGoogleBook(item, fallbackCode = '') {
+  const info = item.volumeInfo || {};
+  const ids = info.industryIdentifiers || [];
+  const isbn13 = ids.find((x) => x.type === 'ISBN_13')?.identifier;
+  const isbn10 = ids.find((x) => x.type === 'ISBN_10')?.identifier;
+  const isbn = isbn13 || isbn10 || fallbackCode;
+
+  return {
+    titulo: info.title || 'Sense títol',
+    autor: (info.authors && info.authors.length ? info.authors.join(', ') : 'Autor desconegut'),
+    descripcion: stripHtmlTags(info.description) || 'Sense descripció disponible',
+    estado: 'Muy bueno',
+    venta: false,
+    precio: 0,
+    isbn,
+    review: {
+      averageRating: info.averageRating || null,
+      ratingsCount: info.ratingsCount || 0,
+      previewLink: info.previewLink || item.saleInfo?.buyLink || '',
+      thumbnail: info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || '',
+      publishedDate: info.publishedDate || '',
+      categories: info.categories || []
+    }
+  };
+}
+
+async function fetchGoogleBookByIsbn(code) {
+  const cleanCode = code.replace(/[^\dXx]/g, '');
+  if (!cleanCode) return null;
+
+  const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(cleanCode)}`);
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  const item = data.items && data.items.length ? data.items[0] : null;
+  if (!item) return null;
+
+  return mapGoogleBook(item, cleanCode);
+}
+
+async function fetchGoogleBook(query) {
+  const normalized = query.trim();
+  if (!normalized) return null;
+
+  const cleanCode = normalized.replace(/[^\dXx]/g, '');
+  if (cleanCode.length >= 10) {
+    const byIsbn = await fetchGoogleBookByIsbn(cleanCode);
+    if (byIsbn) return byIsbn;
+  }
+
+  const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(normalized)}`);
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  const item = data.items && data.items.length ? data.items[0] : null;
+  if (!item) return null;
+  return mapGoogleBook(item, cleanCode);
+}
+
+window.app = {
+  loadHeader,
+  getBooks,
+  getCart,
+  setCart,
+  addToCart,
+  updateCartBadge,
+  getCustomBooks,
+  saveCustomBook,
+  fetchGoogleBookByIsbn,
+  fetchGoogleBook
+};
